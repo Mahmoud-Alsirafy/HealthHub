@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Models\User;
+use Twilio\Rest\Client;
 use Illuminate\View\View;
 use App\Notifications\Otp;
 use Illuminate\Http\Request;
@@ -45,10 +46,34 @@ class RegisteredUserController extends Controller
         ]);
         event(new Registered($user));
 
+
         $user = User::where('email', $request->email)->first();
+
+        // ! Genrate OTP Code
+
         $user->generate_code();
 
+        // ! Email OTP
+
         $user->notify(new Otp());
+
+        // ! SMS OTP
+        $message = "Your OTP Code IS " . $user->code;
+
+        $account_sid   = env('TWILIO_SID');
+        $account_token = env('TWILIO_TOKEN');
+        $account_from  = env('TWILIO_FROM');
+
+        $client = new Client($account_sid, $account_token);
+
+        $client->messages->create(
+            '+201068492403', // رقم المستلم
+            [
+                'from' => $account_from,
+                'body' => $message,
+            ]
+        );
+
         Auth::login($user);
 
         return redirect(route('dashboard', absolute: false));

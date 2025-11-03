@@ -12,6 +12,7 @@
         "laravel/tinker": "^2.10.1",
         "mcamara/laravel-localization": "^2.3",
         "simplesoftwareio/simple-qrcode": "^4.2",
+        "twilio/sdk": "^8.8",
         "yoeunes/toastr": "^3.1"
     },
     "require-dev": {
