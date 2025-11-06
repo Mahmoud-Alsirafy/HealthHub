@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\OtpController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Google\GoogleController;
 use App\Http\Controllers\QR_CODE\Qr_codeController;
 use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
 
@@ -33,6 +34,7 @@ Route::group(
         // ============================OTP=====================
 
         Route::resource('OTP', OtpController::class);
+        Route::get('/resend', [OtpController::class, 'resend'])->name('OTP.resend');
 
         // ============================QR=====================
 
@@ -41,6 +43,13 @@ Route::group(
 
         // ✅ مسار الدخول من خلال QR
         Route::get('/qr-login', [Qr_codeController::class, 'loginByQr'])->name('qr.login');
+
+
+        // ?  ==========================GOOGLE AUTH=================
+
+        Route::get('auth/google',[GoogleController::class,'googlepage']);
+        Route::get('auth/google/callback',[GoogleController::class,'googlepagecallback']);
+        Route::get('auth/google/check',[GoogleController::class,'googlepagecheck']);
     }
 
 );

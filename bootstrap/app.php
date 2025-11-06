@@ -19,6 +19,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'localeCookieRedirect'    => \Mcamara\LaravelLocalization\Middleware\LocaleCookieRedirect::class,
             'localeViewPath'          => \Mcamara\LaravelLocalization\Middleware\LaravelLocalizationViewPath::class,
             "Otp"                     => \App\Http\Middleware\Otp::class,
+            "LoginChick"              => \App\Http\Middleware\LoginCheck::class
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
