@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Notifications\Otp;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -29,16 +30,39 @@ class OtpController extends Controller
     public function store(Request $request)
     {
         $user = Auth::user();
+        if (now()->greaterThan($user->expierd_at)) {
+            toastr()->warning(trans('auth.expierd'));
+            return redirect()->back();
+        }
 
         if ($request->otp == $user->code) {
-            toastr()->success('Success Login '.$user->name);
+            toastr()->success(trans('auth.success_login'));
             $user->reset_code();
             return redirect()->route("dashboard");
         } else {
-            toastr()->error('OTP IS Not Correct');
+            toastr()->error(trans('auth.error_OTP'));
             return redirect()->back();
         }
     }
+
+    public function resend()
+    {
+        $user = Auth::user();
+
+        // لو الكود لسه شغال بلاش نعيده
+        if (now()->lessThan($user->expierd_at)) {
+            toastr()->warning(trans('auth.work'));
+            return redirect()->route('OTP.index');
+        }
+
+        // اعمل كود جديد
+        $user->generate_code();
+        $user->notify(new Otp());
+
+        toastr()->success(trans('auth.resend'));
+        return redirect()->route('OTP.index');
+    }
+
 
     /**
      * Display the specified resource.
