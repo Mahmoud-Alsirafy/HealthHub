@@ -3,7 +3,7 @@
         {{ __('This is a secure area of the application. Please confirm your OTP Code before continuing.') }}
     </div>
 
-    <form method="POST" action="{{ route('OTP.store') }}">
+    <form method="POST" action="{{ route('otp.store') }}">
         @csrf
 
         <!-- Password -->
@@ -15,10 +15,14 @@
 
             <x-input-error :messages="$errors->get('OTP')" class="mt-2" />
         </div>
+        <input type="hidden" name="type" value="{{ $type }}">
+        <input type="hidden" name="id" value="{{ $id }}">
         <div class="resend">
-            <a href="{{ route('OTP.resend') }}" style="background-color: skyblue;">
-                resend The Code
+            <a href="{{ route('otp.resend', ['type' => $type, 'id' => $id]) }}" style="background-color: skyblue;">
+                Resend The Code
             </a>
+
+
         </div>
         <div class="flex justify-end mt-4">
             <x-primary-button>

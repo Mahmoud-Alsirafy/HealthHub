@@ -13,6 +13,7 @@
         "laravel/tinker": "^2.10.1",
         "mcamara/laravel-localization": "^2.3",
         "simplesoftwareio/simple-qrcode": "^4.2",
+        "spatie/pdf-to-text": "^1.54",
         "twilio/sdk": "^8.8",
         "yoeunes/toastr": "^3.1"
     },

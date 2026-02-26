@@ -9,6 +9,7 @@
             <x-input-error :messages="$errors->get('name')" class="mt-2" />
         </div>
 
+        <input type="text" name="type" hidden value="{{ $type }}">
         <!-- Email Address -->
         <div class="mt-4">
             <x-input-label for="email" :value="__('Email')" />
@@ -45,7 +46,7 @@
             <x-input-label for="national_id" :value="__('national_id')" />
 
             <x-text-input id="national_id" class="block mt-1 w-full"
-                            type="text"
+                            type="number"
                             name="national_id"
                             required autocomplete="new-national_id" />
 

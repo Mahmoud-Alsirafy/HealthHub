@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use App\Notifications\Otp;
 use Illuminate\Http\Request;
+use App\Providers\RouteServiceProvider;
 use Illuminate\Support\Facades\Auth;
 
 class OtpController extends Controller
@@ -11,10 +13,19 @@ class OtpController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index($type, $id)
     {
-        return view('pages.otp.verify');
+        // $user = User::where('id', $id)->first();
+
+        // if (!$user) {
+        //     return redirect()->route('selection')
+        //         ->with('error', 'User not found');
+        // }
+
+        return view('pages.otp.verify', compact('id', 'type'));
     }
+
+
 
     /**
      * Show the form for creating a new resource.
@@ -29,30 +40,47 @@ class OtpController extends Controller
      */
     public function store(Request $request)
     {
-        $user = Auth::user();
-        if (now()->greaterThan($user->expierd_at)) {
-            toastr()->warning(trans('auth.expierd'));
-            return redirect()->back();
-        }
+        // return $request;
+        if ($request->type == 'users') {
+            $user = User::where('id', $request->id)->first();
+            if (now()->greaterThan($user->expierd_at)) {
+                toastr()->warning(trans('auth.expierd'));
+                return redirect()->back();
+            }
 
-        if ($request->otp == $user->code) {
-            toastr()->success(trans('auth.success_login'));
-            $user->reset_code();
-            return redirect()->route("dashboard");
-        } else {
-            toastr()->error(trans('auth.error_OTP'));
-            return redirect()->back();
+            if ($request->otp == $user->code) {
+                toastr()->success(trans('auth.success_login'));
+                $user->reset_code();
+                Auth::login($user); // 👈 مهم جدًا            
+                return redirect()->route('user.dashboard'); 
+            } else {
+                toastr()->error(trans('auth.error_OTP'));
+                return redirect()->back();
+            }
+        }
+        else{
+            toastr()->error(trans('some thing went rong'));
+                return redirect()->back();
         }
     }
 
-    public function resend()
+    public function resend($type, $id)
     {
-        $user = Auth::user();
+        // return $type;
+        $user = User::find($id);
+
+        if (!$user) {
+            toastr()->error('User not found!');
+            return redirect()->back();
+        }
 
         // لو الكود لسه شغال بلاش نعيده
         if (now()->lessThan($user->expierd_at)) {
             toastr()->warning(trans('auth.work'));
-            return redirect()->route('OTP.index');
+            return redirect()->route('otp.index', [
+                    'type' => $type,
+                    'id' => $id
+                ]);
         }
 
         // اعمل كود جديد
@@ -60,8 +88,12 @@ class OtpController extends Controller
         $user->notify(new Otp());
 
         toastr()->success(trans('auth.resend'));
-        return redirect()->route('OTP.index');
+        return redirect()->route('otp.index', [
+                    'type' => $type,
+                    'id' => $id
+                ]);
     }
+
 
 
     /**

@@ -1,31 +1,31 @@
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-            {{ __('Dashboard') }}
-        </h2>
-    </x-slot>
+<div class="">
+    @php
+$type = 'web';
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900 dark:text-gray-100">
-                    {{ __("You're logged in!") }}
-                </div>
-            </div>
-        </div>
-    </div>
-</x-app-layout>
+if (auth('doctor')->check()) {
+$type = 'doctor';
+} elseif (auth('lap')->check()) {
+$type = 'lap';
+} elseif (auth('pharma')->check()) {
+$type = 'pharma';
+}
+elseif (auth('paramedic')->check()) {
+$type = 'paramedic';
+}
 
-
-<ul>
-    @foreach(LaravelLocalization::getSupportedLocales() as $localeCode => $properties)
-        <li>
-            <a rel="alternate" hreflang="{{ $localeCode }}" href="{{ LaravelLocalization::getLocalizedURL($localeCode, null, [], true) }}">
-                {{ $properties['native'] }}
-            </a>
-        </li>
-    @endforeach
-</ul>
+@endphp
 
 
-<a href="{{route('qrcode.index')}}">Qr</a>
+
+<form method="POST" action="{{ route('logout', $type) }}">
+    @csrf
+    {{ $type }}
+    <a class="dropdown-item" href="#" onclick="event.preventDefault();this.closest('form').submit();"><i
+            class="bx bx-log-out"></i>تسجيل الخروج</a>
+
+</form>
+
+
+{{-- <a href="{{route('qrcode.index')}}">Qr</a> --}}
+
+</div>

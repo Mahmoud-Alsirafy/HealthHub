@@ -40,6 +40,22 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+        'doctor' => [
+            'driver' => 'session',
+            'provider' => 'doctors',
+        ],
+        'lap' => [
+            'driver' => 'session',
+            'provider' => 'laps',
+        ],
+        'pharma' => [
+            'driver' => 'session',
+            'provider' => 'pharmas',
+        ],
+        'paramedic' => [
+            'driver' => 'session',
+            'provider' => 'paramedics',
+        ],
     ],
 
     /*
@@ -63,6 +79,22 @@ return [
         'users' => [
             'driver' => 'eloquent',
             'model' => env('AUTH_MODEL', App\Models\User::class),
+        ],
+        'doctors' => [
+            'driver' => 'eloquent',
+            'model' => env('AUTH_MODEL', App\Models\Doctor::class),
+        ],
+        'laps' => [
+            'driver' => 'eloquent',
+            'model' => env('AUTH_MODEL', App\Models\Lap::class),
+        ],
+        'pharmas' => [
+            'driver' => 'eloquent',
+            'model' => env('AUTH_MODEL', App\Models\Pharma::class),
+        ],
+        'paramedics' => [
+            'driver' => 'eloquent',
+            'model' => env('AUTH_MODEL', App\Models\Paramedic::class),
         ],
 
         // 'users' => [
