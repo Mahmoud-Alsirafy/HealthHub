@@ -8,34 +8,27 @@ trait AuthTrait
 {
     public function checkGuard($request)
     {
-        if ($request->type == 'users') {
-            $guardName = 'web';
-        } elseif ($request->type == 'doctors') {
-            $guardName = 'doctor';
-        } elseif ($request->type == 'laps') {
-            $guardName = 'lap';
-        }elseif ($request->type == 'pharmas') {
-            $guardName = 'pharma';
-        } else {
-            $guardName = 'paramedic';
-        }
+        $guards = [
+            'users' => 'web',
+            'doctors' => 'doctor',
+            'laps' => 'lap',
+            'pharmas' => 'pharma',
+            'paramedics' => 'paramedic',
+        ];
 
-        return $guardName;
+        return $guards[$request->type] ?? 'web';
     }
 
     public function redirect($request)
     {
-        if ($request->type == 'users') {
-            return redirect()->intended(RouteServiceProvider::USER);
-        } elseif ($request->type == 'doctors') {
-            return redirect()->intended(RouteServiceProvider::DOCTOR);
-        } elseif ($request->type == 'laps') {
-            return redirect()->intended(RouteServiceProvider::LAP);
-        } elseif ($request->type == 'pharmas') {
-            return redirect()->intended(RouteServiceProvider::PHARAMAS);
-        } else {
-            return redirect()->intended(RouteServiceProvider::PARAMEDICS);
-        }
+        $redirects = [
+            'users' => RouteServiceProvider::USER,
+            'doctors' => RouteServiceProvider::DOCTOR,
+            'laps' => RouteServiceProvider::LAP,
+            'pharmas' => RouteServiceProvider::PHARAMAS,
+            'paramedics' => RouteServiceProvider::PARAMEDICS,
+        ];
 
+        return redirect()->intended($redirects[$request->type] ?? RouteServiceProvider::USER);
     }
 }
