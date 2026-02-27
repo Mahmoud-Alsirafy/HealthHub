@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Traits\HasOtp;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -10,7 +11,7 @@ use Illuminate\Notifications\Notifiable;
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, HasOtp;
 
     /**
      * The attributes that are mass assignable.
@@ -47,17 +48,5 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
-    }
-    public function generate_code() {
-        $this->timestamps = false;
-        $this->code = rand(100000 , 999999);
-        $this->expierd_at = now()->addMinute(15);
-        $this->save();
-    }
-    public function reset_code() {
-        $this->timestamps = false;
-        $this->code = null;
-        $this->expierd_at = null;
-        $this->save();
     }
 }
