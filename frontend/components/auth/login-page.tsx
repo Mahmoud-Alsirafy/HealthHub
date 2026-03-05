@@ -87,6 +87,20 @@ function LoginForm() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
+                    <Label htmlFor="login-role">I am a</Label>
+                    <Select value={role} onValueChange={setRole}>
+                      <SelectTrigger id="login-role">
+                        <SelectValue placeholder="Select your role" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="patient">Patient</SelectItem>
+                        <SelectItem value="doctor">Doctor</SelectItem>
+                        <SelectItem value="facility">Medical Facility</SelectItem>
+                        <SelectItem value="paramedic">Paramedic</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
                     <Label htmlFor="login-email">Email or National ID</Label>
                     <Input id="login-email" placeholder="Enter your email or National ID" />
                   </div>
@@ -129,20 +143,6 @@ function LoginForm() {
                   <CardDescription>Register to access the MedLink platform</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="reg-role">I am a</Label>
-                    <Select value={role} onValueChange={setRole}>
-                      <SelectTrigger id="reg-role">
-                        <SelectValue placeholder="Select your role" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="patient">Patient</SelectItem>
-                        <SelectItem value="doctor">Doctor</SelectItem>
-                        <SelectItem value="facility">Medical Facility</SelectItem>
-                        <SelectItem value="paramedic">Paramedic</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-2">
                       <Label htmlFor="reg-first">First Name</Label>

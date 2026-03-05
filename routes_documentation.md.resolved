@@ -1,0 +1,69 @@
+# Backend Route Documentation ([web.php](file:///e:/HealthHub/backend/routes/web.php))
+
+This document outlines all the web routes defined in the Laravel backend [routes/web.php](file:///e:/HealthHub/backend/routes/web.php) file.
+
+## Public / Authentication Routes
+
+| Method | URI | Name | Action | Description |
+|---|---|---|---|---|
+| `GET` | `/` | `selection` | `HomeController@index` | Main entry point / selection screen |
+| `GET` | `/login/{type}` | `login.show` | `LoginController@loginFom` | Displays the login form for a specific user type (guest only) |
+| `POST` | `/login` | `login` | `LoginController@login` | Processes the login request |
+| `GET` | `/login` | `login` | Closure | Redirects to the `selection` route |
+| `POST` | `/logout/{type}` | `logout` | `LoginController@logout` | Processes the logout request for a specific user type |
+
+## Registration Routes
+
+| Method | URI | Name | Action | Description |
+|---|---|---|---|---|
+| `POST` | `/reg_form` | `reg_form` | `registerController@reg_form` | Handles registration form submission |
+| `POST` | `/register` | `register` | `registerController@register` | Processes the user registration |
+
+## Dashboards (Protected by specific guards)
+
+Returns JSON responses instead of views.
+
+| Method | URI | Name | Middleware | Description |
+|---|---|---|---|---|
+| `GET` | `/user` | `user.dashboard` | `auth:web` | Returns JSON of user details (User Dashboard) |
+| `GET` | `/lap` | `lap.dashboard` | `auth:lap` | Returns JSON message (Lap Dashboard) |
+| `GET` | `/pharma` | `pharma.dashboard` | `auth:pharma` | Returns JSON message (Pharma Dashboard) |
+| `GET` | `/paramedics` | `paramedics.dashboard`| `auth:paramedic` | Returns JSON message (Paramedics Dashboard) |
+
+## Localized Routes (Prefixed by Locale)
+
+These routes are prefixed with the current locale (e.g. `/en/dashboard`, `/ar/dashboard`) and use localization middlewares.
+
+| Method | URI | Name | Action | Middleware | Description |
+|---|---|---|---|---|---|
+| `GET` | `/{locale}/dashboard` | `dashboard` | Closure | `auth`, `verified`, `Otp` | General dashboard (Returns JSON) |
+| `GET` | `/{locale}/profile` | `profile.edit` | `ProfileController@edit` | `auth` | Edit user profile |
+| `PATCH` | `/{locale}/profile` | `profile.update`| `ProfileController@update`| `auth` | Update user profile |
+| `DELETE`| `/{locale}/profile` | `profile.destroy`|`ProfileController@destroy`| `auth` | Delete user profile |
+
+### QR Code Routes
+| Method | URI | Name | Action | Description |
+|---|---|---|---|---|
+| *Resource*| `/{locale}/qrcode` | `qrcode.*` | `Qr_codeController` | Standard resource routes for QR codes |
+| `POST` | `/{locale}/qrcode` | `generate` | `Qr_codeController@generate` | Generate a new QR code |
+| `GET` | `/{locale}/qr-login`| `qr.login` | `Qr_codeController@loginByQr`| Login using a QR code |
+
+### Google Authentication
+| Method | URI | Name | Action | Description |
+|---|---|---|---|---|
+| `GET` | `/{locale}/auth/google` | - | `GoogleController@googlepage` | Redirect to Google OAuth |
+| `GET` | `/{locale}/auth/google/callback`| - | `GoogleController@googlepagecallback`| Handle Google OAuth callback |
+| `GET` | `/{locale}/auth/google/check` | - | `GoogleController@googlepagecheck` | Check Google Auth status |
+
+### Image Processing
+| Method | URI | Name | Action | Description |
+|---|---|---|---|---|
+| *Resource*| `/{locale}/image/image` | `image.*` | `ImageController` | Resource routes for image handling (e.g. text extraction) |
+
+## OTP (One-Time Password) Routes
+
+| Method | URI | Name | Action | Description |
+|---|---|---|---|---|
+| `GET` | `/otp/{type}/{id}` | `otp.index` | `OtpController@index` | Shows OTP page for specific user and type |
+| `POST` | `/otp/verify` | `otp.store` | `OtpController@store` | Verifies the submitted OTP |
+| `GET` | `/otp/resend/{type}/{id}` | `otp.resend` | `OtpController@resend` | Resends the OTP to the user |

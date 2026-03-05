@@ -35,7 +35,7 @@ Route::group(['namespace' => 'Auth'], function () {
 
 Route::get('/user', function () {
     $users = User::find(Auth::guard('web')->user()->id)->get();
-    return view('pages.user.index', compact('users'));
+    return response()->json(['users' => $users]);
 })->middleware('auth:web')->name('user.dashboard');
 
 
@@ -47,15 +47,15 @@ Route::get('/user', function () {
 
 
 Route::get('/lap', function () {
-    return view('dashboard');
+    return response()->json(['message' => 'Lap Dashboard']);
 })->middleware('auth:lap')->name('lap.dashboard');
 
 Route::get('/pharma', function () {
-    return view('dashboard');
+    return response()->json(['message' => 'Pharma Dashboard']);
 })->middleware('auth:pharma')->name('pharma.dashboard');
 
 Route::get('/paramedics', function () {
-    return view('dashboard');
+    return response()->json(['message' => 'Paramedics Dashboard']);
 })->middleware('auth:paramedic')->name('paramedics.dashboard');
 
 // -----------------------------------------------------------------------------
@@ -86,7 +86,7 @@ Route::group(
     function () {
 
         Route::get('/dashboard', function () {
-            return view('dashboard');
+            return response()->json(['message' => 'Dashboard']);
         })->middleware(['auth', 'verified', 'Otp'])->name('dashboard');
 
         Route::middleware('auth')->group(function () {
