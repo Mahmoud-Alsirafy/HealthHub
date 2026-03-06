@@ -15,7 +15,7 @@ class Qr_codeController extends Controller
 {
     public function index()
     {
-        return view('pages.QR_Code.Generate');
+        return response()->json(['message' => 'QR Code Generate Page']);
     }
 
     public function generate()
@@ -66,8 +66,10 @@ class Qr_codeController extends Controller
             $name
         ));
 
-        toastr()->success(trans('qr.success_create'));
-        return back();
+        return response()->json([
+            'message' => trans('qr.success_create'),
+            'file_path' => "$folderPath/$fileName"
+        ]);
     }
 
     public function loginByQr(Request $request)
@@ -86,17 +88,18 @@ class Qr_codeController extends Controller
             $user = User::where('email', $payload['email'])->first();
 
             if (!$user) {
-                toastr()->error(trans('qr.!User'));
-                return redirect()->route('login');            }
+                return response()->json(['error' => trans('qr.!User')], 404);
+            }
 
             // ✅ تسجيل الدخول مباشرة بدون كلمة مرور
             Auth::login($user);
 
-            toastr()->success(trans('qr.success_read'));
-            return redirect()->route('dashboard');
+            return response()->json([
+                'message' => trans('qr.success_read'), 
+                'redirect' => route('dashboard')
+            ]);
         } catch (\Exception $e) {
-            toastr()->success(trans('qr.error'));
-            return redirect()->route('login');
+            return response()->json(['error' => trans('qr.error'), 'details' => $e->getMessage()], 400);
         }
     }
 

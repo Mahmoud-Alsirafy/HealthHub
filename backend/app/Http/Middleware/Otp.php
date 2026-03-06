@@ -15,14 +15,20 @@ class Otp
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
     public function handle(Request $request, Closure $next): Response
-    {
-        $user = Auth::user();
-        
-        if(Auth::check() && $user->code){
-            if(!$request->is('OTP*')){
-                return redirect()->route('OTP.index');
-            }
-        }
+{
+    // لو API مش بيعمل redirect ❌
+    if ($request->expectsJson()) {
         return $next($request);
     }
+
+    $user = Auth::user();
+
+    if (Auth::check() && $user->code) {
+        if (!$request->is('OTP*')) {
+            return redirect()->route('OTP.index');
+        }
+    }
+
+    return $next($request);
+}
 }

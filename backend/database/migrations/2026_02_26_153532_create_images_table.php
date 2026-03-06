@@ -6,9 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('images', function (Blueprint $table) {
@@ -16,15 +13,27 @@ return new class extends Migration
             $table->string('filename');
             $table->integer('imageable_id');
             $table->string('imageable_type');
+
+            // ✅ أضفهم هنا
+            $table->enum('type', [
+                'xray',
+                'lab_result',
+                'prescription',
+                'medical_report',
+                'vaccine'
+            ])->nullable();
+            $table->string('title')->nullable();
+            $table->text('notes')->nullable();
+            $table->date('date')->nullable();
+
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('images');
+        Schema::table('images', function (Blueprint $table) {
+            $table->dropColumn(['type', 'title', 'notes', 'date']);
+        });
     }
 };

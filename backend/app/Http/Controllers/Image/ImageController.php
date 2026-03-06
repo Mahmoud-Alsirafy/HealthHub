@@ -11,7 +11,7 @@ class ImageController extends Controller
 {
     public function index()
     {
-        return view('pages.image.index');
+        return response()->json(['message' => 'Image Process Page']);
     }
 
     // public function store(Request $request)
@@ -53,15 +53,29 @@ class ImageController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'file' => "required",
-            "mimes:png,jpg,png",
-            "max:10000",
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+            'file' => 'required|mimes:pdf|max:10000',
         ]);
-        $file = $request->file('file');
-        $text = (new Pdf())
-            ->setPdf($file)
-            ->text();
-            return back()->with('text', $text);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        try {
+            $file = $request->file('file');
+            $text = (new Pdf())
+                ->setPdf($file)
+                ->text();
+            
+            return response()->json([
+                'message' => 'File processed successfully',
+                'extracted_text' => $text
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Failed to process file',
+                'details' => $e->getMessage()
+            ], 500);
+        }
     }
 }
