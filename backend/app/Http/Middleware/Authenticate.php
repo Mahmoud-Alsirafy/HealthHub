@@ -3,32 +3,18 @@
 namespace App\Http\Middleware;
 
 use Illuminate\Auth\Middleware\Authenticate as Middleware;
-use Illuminate\Support\Facades\Request;
+use Illuminate\Http\Request;
 
 class Authenticate extends Middleware
 {
-    protected function redirectTo($request): ?string
+    protected function redirectTo(Request $request): ?string
     {
-        if (!$request->expectsJson()) {
-            if (Request::is(app()->getLocale() . '/user')) {
-                return route('selection');
-            }
-
-            if (Request::is(app()->getLocale() . '/doctor/dashboard')) {
-                return route('selection');
-            }
-
-            if (Request::is(app()->getLocale() . '/lap')) {
-                return route('selection');
-            }
-            if (Request::is(app()->getLocale() . '/pharma')) {
-                return route('selection');
-            }
-
-
-            return route('selection');
+        // لو API request → مش بيعمل redirect، بيرجع 401
+        if ($request->expectsJson()) {
+            return null;
         }
 
-        return null;
+        // لو Web request → روح صفحة الاختيار
+        return route('selection');
     }
 }

@@ -18,15 +18,15 @@ use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
 
 
 
-Route::group(['namespace' => 'Auth'], function () {
-    Route::get('/', [HomeController::class, 'index'])->name('selection');
-    Route::get('/login/{type}', [LoginController::class, 'loginFom'])->middleware('guest')->name('login.show');
-    Route::post('/login', [LoginController::class, 'login'])->name('login');
-    Route::get('/login', function () {
-        return redirect()->route('selection');
-    })->name('login');
-    Route::post('/logout/{type}', [LoginController::class, 'logout'])->name('logout');
-});
+// Route::group(['namespace' => 'Auth'], function () {
+//     Route::get('/', [HomeController::class, 'index'])->name('selection');
+//     Route::get('/login/{type}', [LoginController::class, 'loginFom'])->middleware('guest')->name('login.show');
+//     Route::post('/login', [LoginController::class, 'login'])->name('login');
+//     Route::get('/login', function () {
+//         return redirect()->route('selection');
+//     })->name('login');
+//     Route::post('/logout/{type}', [LoginController::class, 'logout'])->name('logout');
+// });
 
 
 // -----------------------------------------------------------------------------
@@ -89,11 +89,7 @@ Route::group(
             return response()->json(['message' => 'Dashboard']);
         })->middleware(['auth', 'verified', 'Otp'])->name('dashboard');
 
-        Route::middleware('auth')->group(function () {
-            Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-            Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-            Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-        });
+
 
 
 
@@ -118,13 +114,6 @@ Route::group(
     }
 );
 
-Route::get('/otp/{type}/{id}', [OtpController::class, 'index'])
-    ->name('otp.index');
 
-Route::post('/otp/verify', [OtpController::class, 'store'])
-    ->name('otp.store');
-
-Route::get('/otp/resend/{type}/{id}', [OtpController::class, 'resend'])
-    ->name('otp.resend');
 
 // require __DIR__ . '/auth.php';

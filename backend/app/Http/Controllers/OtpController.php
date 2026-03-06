@@ -22,14 +22,7 @@ class OtpController extends Controller
      */
     public function index($type, $id)
     {
-        // $user = User::where('id', $id)->first();
-
-        // if (!$user) {
-        //     return redirect()->route('selection')
-        //         ->with('error', 'User not found');
-        // }
-
-        return view('pages.otp.verify', compact('id', 'type'));
+        return response()->json(['message' => 'OTP Verify Page', 'type' => $type, 'id' => $id]);
     }
 
 
@@ -59,69 +52,81 @@ class OtpController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-    {
-        $modelClass = $this->getModel($request->type);
-        if (!$modelClass) {
-            toastr()->error(trans('auth.failed'));
-            return redirect()->back();
-        }
+{
+    $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+        'type' => 'required|string',
+        'id'   => 'required|integer',
+        'otp'  => 'required|string',
+    ]);
 
-        $user = $modelClass::where('id', $request->id)->first();
-
-        if (!$user) {
-            toastr()->error(trans('auth.failed'));
-            return redirect()->back();
-        }
-
-        if (now()->greaterThan($user->expierd_at)) {
-            toastr()->warning(trans('auth.expierd'));
-            return redirect()->back();
-        }
-
-        if ($request->otp == $user->code) {
-            toastr()->success(trans('auth.success_login'));
-            $user->reset_code();
-            Auth::guard($this->checkGuard($request))->login($user);
-            return $this->redirect($request);
-        } else {
-            toastr()->error(trans('auth.error_OTP'));
-            return redirect()->back();
-        }
+    if ($validator->fails()) {
+        return response()->json(['errors' => $validator->errors()], 422);
     }
+
+    $modelClass = $this->getModel($request->type);
+    if (!$modelClass) {
+        return response()->json(['error' => trans('auth.failed')], 404);
+    }
+
+    $user = $modelClass::find($request->id);
+    if (!$user) {
+        return response()->json(['error' => trans('auth.failed')], 404);
+    }
+
+    if ($user->expierd_at && now()->greaterThan($user->expierd_at)) {
+        return response()->json(['error' => trans('auth.expierd')], 400);
+    }
+
+    if ($request->otp != $user->code) {
+        return response()->json(['error' => trans('auth.error_OTP')], 400);
+    }
+
+    // ✅ reset الكود
+    $user->reset_code();
+
+    $guard = $this->checkGuard($request);
+
+    // return $guard;
+    // ✅ لو API → رجّع JWT token
+    if ($request->expectsJson()) {
+        $token = auth()->guard($guard)->login($user);
+
+        return response()->json([
+            'message' => trans('auth.success_login'),
+            'token'   => $token,
+            'type'    => 'bearer',
+            'user'    => $user,
+        ]);
+    }
+
+    // ✅ لو Web → session login + redirect
+    Auth::guard($guard)->login($user);
+    return $this->redirect($request);
+}
 
     public function resend($type, $id)
     {
         $modelClass = $this->getModel($type);
         if (!$modelClass) {
-            toastr()->error('User not found!');
-            return redirect()->back();
+            return response()->json(['error' => 'User not found!'], 404);
         }
 
         $user = $modelClass::find($id);
 
         if (!$user) {
-            toastr()->error('User not found!');
-            return redirect()->back();
+            return response()->json(['error' => 'User not found!'], 404);
         }
 
         // لو الكود لسه شغال بلاش نعيده
         if ($user->expierd_at && now()->lessThan($user->expierd_at)) {
-            toastr()->warning(trans('auth.work'));
-            return redirect()->route('otp.index', [
-                    'type' => $type,
-                    'id' => $id
-                ]);
+            return response()->json(['message' => trans('auth.work'), 'expires_at' => $user->expierd_at], 200);
         }
 
         // اعمل كود جديد
         $user->generate_code();
         $user->notify(new Otp());
 
-        toastr()->success(trans('auth.resend'));
-        return redirect()->route('otp.index', [
-                    'type' => $type,
-                    'id' => $id
-                ]);
+        return response()->json(['message' => trans('auth.resend'), 'expires_at' => $user->expierd_at], 200);
     }
 
 
