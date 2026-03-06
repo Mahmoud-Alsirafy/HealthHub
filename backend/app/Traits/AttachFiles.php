@@ -2,7 +2,7 @@
 
 namespace App\Traits;
 
-use App\Models\Images;
+use App\Models\Image;
 use Illuminate\Support\Facades\Storage;
 
 trait AttachFiles
@@ -29,7 +29,7 @@ trait AttachFiles
 
         if (Storage::disk('upload_attachments')->exists($path)) {
             Storage::disk('upload_attachments')->deleteDirectory($path);
-            Images::where('imageable_id', $id)->delete();
+            Image::where('imageable_id', $id)->delete();
         }
     }
 }

@@ -14,7 +14,7 @@ return [
     */
 
     'defaults' => [
-        'guard' => env('AUTH_GUARD', 'web'),
+        'guard' => 'api',
         'passwords' => env('AUTH_PASSWORD_BROKER', 'users'),
     ],
 
@@ -36,27 +36,34 @@ return [
     */
 
     'guards' => [
-        'web' => [
-            'driver' => 'session',
-            'provider' => 'users',
-        ],
-        'doctor' => [
-            'driver' => 'session',
-            'provider' => 'doctors',
-        ],
-        'lap' => [
-            'driver' => 'session',
-            'provider' => 'laps',
-        ],
-        'pharma' => [
-            'driver' => 'session',
-            'provider' => 'pharmas',
-        ],
-        'paramedic' => [
-            'driver' => 'session',
-            'provider' => 'paramedics',
-        ],
+    'web' => [
+        'driver'   => 'session',
+        'provider' => 'users',
     ],
+
+    'api' => [
+        'driver'   => 'jwt',
+        'provider' => 'users',
+    ],
+
+    // JWT Guards للـ API
+    'doctor' => [
+        'driver'   => 'jwt',      // ← غير من session لـ jwt
+        'provider' => 'doctors',
+    ],
+    'lap' => [
+        'driver'   => 'jwt',
+        'provider' => 'laps',
+    ],
+    'pharma' => [
+        'driver'   => 'jwt',
+        'provider' => 'pharmas',
+    ],
+    'paramedic' => [
+        'driver'   => 'jwt',
+        'provider' => 'paramedics',
+    ],
+],
 
     /*
     |--------------------------------------------------------------------------
@@ -76,33 +83,27 @@ return [
     */
 
     'providers' => [
-        'users' => [
-            'driver' => 'eloquent',
-            'model' => env('AUTH_MODEL', App\Models\User::class),
-        ],
-        'doctors' => [
-            'driver' => 'eloquent',
-            'model' => env('AUTH_MODEL', App\Models\Doctor::class),
-        ],
-        'laps' => [
-            'driver' => 'eloquent',
-            'model' => env('AUTH_MODEL', App\Models\Lap::class),
-        ],
-        'pharmas' => [
-            'driver' => 'eloquent',
-            'model' => env('AUTH_MODEL', App\Models\Pharma::class),
-        ],
-        'paramedics' => [
-            'driver' => 'eloquent',
-            'model' => env('AUTH_MODEL', App\Models\Paramedic::class),
-        ],
-
-        // 'users' => [
-        //     'driver' => 'database',
-        //     'table' => 'users',
-        // ],
+    'users' => [
+        'driver' => 'eloquent',
+        'model'  => App\Models\User::class,      // ✅ مش env()
     ],
-
+    'doctors' => [
+        'driver' => 'eloquent',
+        'model'  => App\Models\Doctor::class,    // ✅
+    ],
+    'laps' => [
+        'driver' => 'eloquent',
+        'model'  => App\Models\Lap::class,       // ✅
+    ],
+    'pharmas' => [
+        'driver' => 'eloquent',
+        'model'  => App\Models\Pharma::class,    // ✅
+    ],
+    'paramedics' => [
+        'driver' => 'eloquent',
+        'model'  => App\Models\Paramedic::class, // ✅
+    ],
+],
     /*
     |--------------------------------------------------------------------------
     | Resetting Passwords

@@ -3,28 +3,32 @@
 namespace App\Http\Middleware;
 
 use Closure;
-
 use Illuminate\Http\Request;
 use App\Providers\RouteServiceProvider;
 
 class RedirectIfAuthenticated
 {
-
-    public function handle(Request $request, Closure $next)
+    public function handle(Request $request, Closure $next, string ...$guards)
     {
-        if(auth('users')->check()){
+        // لو API request → مش بيعمل redirect
+        if ($request->expectsJson()) {
+            return $next($request);
+        }
+
+        // Web: تحقق من كل guard وعمل redirect لو مسجل
+        if (auth('api')->check()) {
             return redirect(RouteServiceProvider::USER);
         }
-        if(auth('doctors')->check()){
+        if (auth('doctor')->check()) {
             return redirect(RouteServiceProvider::DOCTOR);
         }
-        if(auth('laps')->check()){
+        if (auth('lap')->check()) {
             return redirect(RouteServiceProvider::LAP);
         }
-        if(auth('pharmas')->check()){
+        if (auth('pharma')->check()) {
             return redirect(RouteServiceProvider::PHARAMAS);
         }
-        if(auth('paramedics')->check()){
+        if (auth('paramedic')->check()) {
             return redirect(RouteServiceProvider::PARAMEDICS);
         }
 
