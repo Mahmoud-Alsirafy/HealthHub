@@ -24,7 +24,7 @@ class registerController extends Controller
     {
         if ($request->type !== 'users') {
             return response()->json([
-                'error' => 'التسجيل متاح للمستخدمين فقط',
+                'error' => 'Registration is only available for users',
             ], 403);
         }
 
@@ -69,7 +69,7 @@ class registerController extends Controller
         } catch (\Throwable $e) {
             DB::rollBack();
             return response()->json([
-                'error'   => 'فشل التسجيل',
+                'error'   => 'Registration failed',
                 'details' => $e->getMessage(),
             ], 500);
         }

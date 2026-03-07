@@ -3,7 +3,8 @@
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\registerController;
 use App\Http\Controllers\OtpController;
-use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\User\ProfileController;
+use App\Http\Controllers\User\QrCodeController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -25,7 +26,6 @@ Route::prefix('auth')->group(function () {
 
     // Register (users only)
     Route::post('/register', [registerController::class, 'register'])->name('api.register');
-
 });
 
 
@@ -50,6 +50,10 @@ Route::middleware('auth:api')->prefix('user')->group(function () {
     Route::get('/profile', [ProfileController::class, 'show']);
     Route::post('/profile', [ProfileController::class, 'update']);
     Route::delete('/profile', [ProfileController::class, 'destroy']);
+    Route::post('/patient-profile', [ProfileController::class, 'updateProfile']);
+    Route::get('/files', [ProfileController::class, 'getFiles']);
+    Route::post('/files', [ProfileController::class, 'storeMedicalFile']);
+    Route::delete('/files/{id}', [ProfileController::class, 'destroyFile']);
 });
 
 // -------------------------------------------------------
@@ -59,7 +63,6 @@ Route::middleware('auth:doctor')->prefix('doctor')->group(function () {
 
     Route::post('/logout', [LoginController::class, 'logout'])->name('api.doctor.logout');
     Route::get('/me', [LoginController::class, 'me'])->name('api.doctor.me');
-
 });
 
 // -------------------------------------------------------
@@ -69,7 +72,6 @@ Route::middleware('auth:lap')->prefix('lap')->group(function () {
 
     Route::post('/logout', [LoginController::class, 'logout'])->name('api.lap.logout');
     Route::get('/me', [LoginController::class, 'me'])->name('api.lap.me');
-
 });
 
 // -------------------------------------------------------
@@ -79,7 +81,6 @@ Route::middleware('auth:pharma')->prefix('pharma')->group(function () {
 
     Route::post('/logout', [LoginController::class, 'logout'])->name('api.pharma.logout');
     Route::get('/me', [LoginController::class, 'me'])->name('api.pharma.me');
-
 });
 
 // -------------------------------------------------------
@@ -89,8 +90,19 @@ Route::middleware('auth:paramedic')->prefix('paramedic')->group(function () {
 
     Route::post('/logout', [LoginController::class, 'logout'])->name('api.paramedic.logout');
     Route::get('/me', [LoginController::class, 'me'])->name('api.paramedic.me');
-
 });
 
 
-
+// -------------------------------------------------------
+// Qr Routes (Public)
+// -------------------------------------------------------
+// Public
+Route::get('/qr/login/{code}', [QrCodeController::class, 'loginWithQr']);
+// -------------------------------------------------------
+// Qr Routes (Protected)
+// -------------------------------------------------------
+// Protected
+Route::middleware('auth:api')->prefix('user')->group(function () {
+    Route::get('/qr', [QrCodeController::class, 'generateQrBase64']);
+    Route::post('/qr/regenerate', [QrCodeController::class, 'regenerate']);
+});

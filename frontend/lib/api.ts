@@ -68,3 +68,110 @@ export async function logoutApi(type: string, token: string) {
   });
   return response.json();
 }
+
+export async function getProfileApi(token: string) {
+  const response = await fetch(`${API_BASE_URL}/user/profile`, {
+    method: "GET",
+    headers: {
+      "Accept": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+  });
+  return response.json();
+}
+
+export async function updateBasicProfileApi(token: string, data: any) {
+  const response = await fetch(`${API_BASE_URL}/user/profile`, {
+    method: "POST",
+    headers: {
+      "Accept": "application/json",
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+    body: JSON.stringify(data),
+  });
+  return response.json();
+}
+
+export async function updatePatientProfileApi(token: string, data: any) {
+  const response = await fetch(`${API_BASE_URL}/user/patient-profile`, {
+    method: "POST",
+    headers: {
+      "Accept": "application/json",
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+    body: JSON.stringify(data),
+  });
+  return response.json();
+}
+
+export async function getFilesApi(token: string, type?: string) {
+  const url = type ? `${API_BASE_URL}/user/files?type=${type}` : `${API_BASE_URL}/user/files`;
+  const response = await fetch(url, {
+    method: "GET",
+    headers: {
+      "Accept": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+  });
+  return response.json();
+}
+
+export async function uploadFileApi(token: string, formData: FormData) {
+  const response = await fetch(`${API_BASE_URL}/user/files`, {
+    method: "POST",
+    headers: {
+      "Accept": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+    body: formData,
+  });
+  return response.json();
+}
+
+export async function deleteFileApi(token: string, id: number | string) {
+  const response = await fetch(`${API_BASE_URL}/user/files/${id}`, {
+    method: "DELETE",
+    headers: {
+      "Accept": "application/json",
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+  });
+  return response.json();
+}
+
+export async function deleteAccountApi(token: string, password: string) {
+  const response = await fetch(`${API_BASE_URL}/user/profile?password=${encodeURIComponent(password)}`, {
+    method: "DELETE",
+    headers: {
+      "Accept": "application/json",
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+  });
+  return response.json();
+}
+
+export async function getQrApi(token: string) {
+  const response = await fetch(`${API_BASE_URL}/user/qr`, {
+    method: "GET",
+    headers: {
+      "Accept": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+  });
+  return response.json();
+}
+
+export async function regenerateQrApi(token: string) {
+  const response = await fetch(`${API_BASE_URL}/user/qr/regenerate`, {
+    method: "POST",
+    headers: {
+      "Accept": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+  });
+  return response.json();
+}

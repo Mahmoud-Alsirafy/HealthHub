@@ -31,7 +31,7 @@ class LoginController extends Controller
             'password' => $request->password,
         ])) {
             return response()->json([
-                'message' => 'بيانات الدخول غير صحيحة',
+                'message' => 'Invalid credentials',
             ], 401);
         }
 
@@ -44,7 +44,7 @@ class LoginController extends Controller
         $user->notify(new \App\Notifications\Otp());
 
         return response()->json([
-            'message' => 'تم إرسال كود التحقق على بريدك الإلكتروني',
+            'message' => 'Verification code sent to your email',
             'id'      => $user->id,
             'type'    => $request->type,
         ]);
@@ -58,7 +58,7 @@ class LoginController extends Controller
         return $this->redirect($request);
     }
 
-    return back()->withErrors(['email' => 'بيانات الدخول غير صحيحة']);
+    return back()->withErrors(['email' => 'Invalid credentials']);
 }
 
     /**
@@ -72,7 +72,7 @@ class LoginController extends Controller
         auth()->guard($guard)->logout();
 
         return response()->json([
-            'message' => 'تم تسجيل الخروج بنجاح'
+            'message' => 'Logged out successfully'
         ]);
     }
 

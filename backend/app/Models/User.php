@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Models\Image;
 use App\Traits\HasOtp;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -14,14 +13,7 @@ class User extends Authenticatable implements JWTSubject
     use HasFactory, Notifiable, HasOtp;
 
     protected $fillable = [
-        'name', 'email', 'password', 'national_id', 'code', 'expierd_at',
-        'phone', 'phone_alt', 'birth_date', 'gender',
-        'nationality', 'marital_status', 'occupation',
-        'governorate', 'city', 'address',
-        'blood_type', 'height', 'weight',
-        'chronic_diseases', 'allergies', 'current_medications',
-        'previous_surgeries', 'family_history',
-        'emergency_contact_name', 'emergency_contact_phone', 'emergency_contact_relation',
+        'name', 'email', 'password', 'national_id', 'code', 'qr_code', 'expierd_at',
     ];
 
     protected $hidden = [
@@ -29,15 +21,7 @@ class User extends Authenticatable implements JWTSubject
     ];
 
     protected $visible = [
-        'id', 'name', 'email', 'national_id',
-        'phone', 'phone_alt', 'birth_date', 'gender',
-        'nationality', 'marital_status', 'occupation',
-        'governorate', 'city', 'address',
-        'blood_type', 'height', 'weight',
-        'chronic_diseases', 'allergies', 'current_medications',
-        'previous_surgeries', 'family_history',
-        'emergency_contact_name', 'emergency_contact_phone', 'emergency_contact_relation',
-        'medical_files',
+        'id', 'name', 'email', 'national_id', 'profile',
     ];
 
     protected function casts(): array
@@ -46,15 +30,20 @@ class User extends Authenticatable implements JWTSubject
             'email_verified_at' => 'datetime',
             'password'          => 'hashed',
             'expierd_at'        => 'datetime',
-            'birth_date'        => 'date',
         ];
     }
 
-    public function images()
-{
-    return $this->morphMany(Image::class, 'imageable');
-}
+    // -------------------------------------------------------
+    // Relationships
+    // -------------------------------------------------------
+    public function profile()
+    {
+        return $this->hasOne(PatientProfile::class);
+    }
 
+    // -------------------------------------------------------
+    // JWT
+    // -------------------------------------------------------
     public function getJWTIdentifier()
     {
         return $this->getKey();
@@ -64,4 +53,19 @@ class User extends Authenticatable implements JWTSubject
     {
         return [];
     }
+
+    protected static function booted(): void
+{
+    static::deleting(function (User $user) {
+        if ($user->profile) {
+            // حذف الصور من الـ storage
+            foreach ($user->profile->images as $image) {
+                \Illuminate\Support\Facades\Storage::disk('upload_attachments')
+                    ->delete('attachments/PatientProfile/' . $user->profile->id . '/' . $image->filename);
+                $image->delete();
+            }
+            $user->profile->delete();
+        }
+    });
+}
 }

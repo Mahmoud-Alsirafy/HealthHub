@@ -1,22 +1,25 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\User;
 
 use App\Models\User;
+use App\Models\Image;
+use App\Models\PatientProfile;
 use App\Traits\AttachFiles;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\Controller;
 
 class ProfileController extends Controller
 {
     use AttachFiles;
 
     // -------------------------------------------------------
-    // عرض بيانات المستخدم + الملفات الطبية
+    // عرض بيانات المستخدم + الملف الشخصي + الملفات الطبية
     // -------------------------------------------------------
     public function show()
     {
-        $user = User::with('images')->find(Auth::guard('api')->id());
+        $user = User::with('profile.images')->find(Auth::guard('api')->id());
 
         return response()->json([
             'user' => $user,
@@ -24,17 +27,35 @@ class ProfileController extends Controller
     }
 
     // -------------------------------------------------------
-    // تحديث بيانات المستخدم
+    // تحديث بيانات المستخدم الأساسية
     // -------------------------------------------------------
     public function update(Request $request)
     {
         $user = User::find(Auth::guard('api')->id());
 
         $validated = $request->validate([
-            'name'                       => 'sometimes|nullable|string|max:255',
+            'name'        => 'sometimes|nullable|string|max:255',
+            'national_id' => 'sometimes|nullable|string|max:14',
+        ]);
+
+        $user->update($validated);
+
+        return response()->json([
+            'message' => 'Data updated successfully',
+            'user'    => $user->fresh(),
+        ]);
+    }
+
+    // -------------------------------------------------------
+    // تحديث الملف الشخصي للمريض
+    // -------------------------------------------------------
+    public function updateProfile(Request $request)
+    {
+        $user = User::find(Auth::guard('api')->id());
+
+        $validated = $request->validate([
             'phone'                      => 'sometimes|nullable|string|max:20',
             'phone_alt'                  => 'sometimes|nullable|string|max:20',
-            'national_id'                => 'sometimes|nullable|string|max:14',
             'birth_date'                 => 'sometimes|nullable|date',
             'gender'                     => 'sometimes|nullable|in:male,female',
             'nationality'                => 'sometimes|nullable|string|max:100',
@@ -56,22 +77,25 @@ class ProfileController extends Controller
             'emergency_contact_relation' => 'sometimes|nullable|string|max:100',
         ]);
 
-        $user->update($validated);
+        // ✅ updateOrCreate - لو مفيش profile هيعمل واحد جديد
+        $profile = PatientProfile::updateOrCreate(
+            ['user_id' => $user->id],
+            $validated
+        );
 
         return response()->json([
-            'message' => 'تم تحديث البيانات بنجاح',
-            'user'    => User::find($user->id),
+            'message' => 'Profile updated successfully',
+            'profile' => $profile,
         ]);
     }
 
     // -------------------------------------------------------
-    // رفع ملف طبي
-    // ✅ بنرفع على الـ User مباشرة عن طريق morphMany
+    // رفع ملف طبي على الـ PatientProfile
     // -------------------------------------------------------
     public function storeMedicalFile(Request $request)
     {
         $request->validate([
-            'files'   => 'required|array',
+            'files'   => 'required',
             'files.*' => 'file|mimes:jpg,jpeg,png,pdf|max:10240',
             'type'    => 'required|in:xray,lab_result,prescription,medical_report,vaccine',
             'title'   => 'required|string|max:255',
@@ -81,36 +105,27 @@ class ProfileController extends Controller
 
         $user = User::find(Auth::guard('api')->id());
 
-        foreach ($request->file('files') as $file) {
-            $fileName = $file->getClientOriginalName();
-            $file->storeAs('attachments/users/' . $user->id, $fileName, 'upload_attachments');
+        // ✅ لو مفيش profile هيعمل واحد فاضي
+        $profile = PatientProfile::firstOrCreate(['user_id' => $user->id]);
 
-            // ✅ بنحفظ في images table مع الـ type والـ title
-            $user->images()->create([
-                'filename' => $fileName,
-                'type'     => $request->type,
-                'title'    => $request->title,
-                'notes'    => $request->notes,
-                'date'     => $request->date,
-            ]);
-        }
+        $this->uploadFile($request,$profile,'PatientProfile');
 
         return response()->json([
-            'message' => 'تم رفع الملف بنجاح',
-            'files'   => $user->images()->latest()->get(),
+            'message' => 'File uploaded successfully',
+            'files'   => $profile->images()->latest()->get(),
         ], 201);
     }
 
     // -------------------------------------------------------
-    // عرض الملفات الطبية (مع فلترة اختيارية)
+    // عرض الملفات الطبية
     // -------------------------------------------------------
     public function getFiles(Request $request)
     {
         $user = User::find(Auth::guard('api')->id());
+        $profile = PatientProfile::firstOrCreate(['user_id' => $user->id]);
 
-        $query = $user->images();
+        $query = $profile->images();
 
-        // فلترة حسب النوع لو موجود ?type=xray
         if ($request->type) {
             $query->where('type', $request->type);
         }
@@ -126,19 +141,23 @@ class ProfileController extends Controller
     public function destroyFile($id)
     {
         $user = User::find(Auth::guard('api')->id());
+        $profile = PatientProfile::where('user_id', $user->id)->first();
 
-        // ✅ نتأكد إن الملف بيتبع الـ user ده
-        $file = $user->images()->where('id', $id)->first();
-
-        if (!$file) {
-            return response()->json(['error' => 'الملف غير موجود'], 404);
+        if (!$profile) {
+            return response()->json(['error' => 'There is no patient profile'], 404);
         }
 
-        $this->deleteFile($user->id, 'users');
+        $file = $profile->images()->where('imageable_id', $id)->first();
+
+        if (!$file) {
+            return response()->json(['error' => 'File not found'], 404);
+        }
+
+        $this->deleteFile($profile->id, 'PatientProfile');
         $file->delete();
 
         return response()->json([
-            'message' => 'تم حذف الملف بنجاح',
+            'message' => 'File deleted successfully',
         ]);
     }
 
@@ -156,7 +175,7 @@ class ProfileController extends Controller
         $user->delete();
 
         return response()->json([
-            'message' => 'تم حذف الحساب بنجاح',
+            'message' => 'Account deleted successfully',
         ]);
     }
 }

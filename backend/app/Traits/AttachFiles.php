@@ -7,20 +7,29 @@ use Illuminate\Support\Facades\Storage;
 
 trait AttachFiles
 {
-    public function uploadFile($files, $model, $folder)
-    {
-        foreach ($files as $file) {
+    public function uploadFile($request, $model, $folder)
+{
+    $files = $request->file('files');
 
-            $fileName = $file->getClientOriginalName();
-
-            $file->storeAs('attachments/', $folder . "/" . $model->id . "/" . $fileName, 'upload_attachments');
-
-
-            $model->images()->create([
-                'filename' => $fileName,
-            ]);
-        }
+    // ✅ لو ملف واحد حوّله لـ array
+    if (!is_array($files)) {
+        $files = [$files];
     }
+
+    foreach ($files as $file) {
+        $fileName = $file->getClientOriginalName();
+
+        $file->storeAs('attachments/' . $folder . '/' . $model->id, $fileName, 'upload_attachments');
+
+        $model->images()->create([
+            'filename' => $fileName,
+            'type'     => $request->type,
+            'title'    => $request->title,
+            'notes'    => $request->notes,
+            'date'     => $request->date,
+        ]);
+    }
+}
 
 
     public function deleteFile($id, $folder)

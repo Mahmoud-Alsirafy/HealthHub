@@ -1,8 +1,9 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { Bell, LogOut, ChevronDown, Shield } from "lucide-react"
+import { useRouter, usePathname } from "next/navigation"
+import { Bell, LogOut, ChevronDown, Shield, User, Settings } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
@@ -34,9 +35,11 @@ import { type LucideIcon } from "lucide-react"
 
 interface NavItem {
   title: string
-  href: string
+  href?: string
   icon: LucideIcon
   badge?: string
+  onClick?: () => void
+  isActive?: boolean
 }
 
 interface DashboardShellProps {
@@ -49,6 +52,24 @@ interface DashboardShellProps {
 
 export function DashboardShell({ children, navItems, userName, userRole, userInitials }: DashboardShellProps) {
   const pathname = usePathname()
+  const router = useRouter()
+
+  const [token, setToken] = useState<string | null>(null)
+
+  useEffect(() => {
+    const t = localStorage.getItem("auth_token")
+    if (!t) {
+      router.push("/")
+    } else {
+      setToken(t)
+    }
+  }, [router])
+
+  const handleLogout = () => {
+    localStorage.removeItem("auth_token")
+    localStorage.removeItem("user_role")
+    router.push("/")
+  }
 
   return (
     <SidebarProvider>
@@ -64,15 +85,31 @@ export function DashboardShell({ children, navItems, userName, userRole, userIni
             <SidebarGroupContent>
               <SidebarMenu>
                 {navItems.map((item) => (
-                  <SidebarMenuItem key={item.href}>
-                    <SidebarMenuButton asChild isActive={pathname === item.href} tooltip={item.title}>
-                      <Link href={item.href}>
-                        <item.icon className="h-4 w-4" />
-                        <span>{item.title}</span>
-                        {item.badge && (
-                          <Badge variant="secondary" className="ml-auto text-xs">{item.badge}</Badge>
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton
+                      asChild={!!item.href}
+                      onClick={item.onClick}
+                      isActive={item.isActive !== undefined ? item.isActive : (item.href ? pathname === item.href : false)}
+                      tooltip={item.title}
+                    >
+                      {item.href ? (
+                        <Link href={item.href}>
+                          <item.icon className="h-4 w-4" />
+                          <span>{item.title}</span>
+                          {item.badge && (
+                            <Badge variant="secondary" className="ml-auto text-xs">{item.badge}</Badge>
+                          )}
+                        </Link>
+                      )
+                      : (
+                        <button type="button" className="flex w-full items-center gap-2">
+                          <item.icon className="h-4 w-4" />
+                          <span>{item.title}</span>
+                          {item.badge && (
+                            <Badge variant="secondary" className="ml-auto text-xs">{item.badge}</Badge>
+                          )}
+                        </button>
                         )}
-                      </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}
@@ -114,10 +151,8 @@ export function DashboardShell({ children, navItems, userName, userRole, userIni
                 <DropdownMenuItem>Profile Settings</DropdownMenuItem>
                 <DropdownMenuItem>Activity Log</DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link href="/" className="flex items-center text-destructive">
-                    <LogOut className="mr-2 h-4 w-4" /> Sign Out
-                  </Link>
+                <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive cursor-pointer">
+                  <LogOut className="mr-2 h-4 w-4" /> Sign Out
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
