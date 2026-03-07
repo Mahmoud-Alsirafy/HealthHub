@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { MedLinkLogo } from "@/components/medlink-logo"
 import { Suspense, useRef } from "react"
 import { loginApi, registerApi, verifyOtpApi, resendOtpApi } from "@/lib/api"
-import { Html5QrcodeScanner } from "html5-qrcode"
+import { Html5Qrcode } from "html5-qrcode"
 
 // OTP Input Component
 function OtpInput({ value, onChange, length = 6 }: { value: string, onChange: (val: string) => void, length?: number }) {
@@ -67,6 +67,7 @@ function OtpInput({ value, onChange, length = 6 }: { value: string, onChange: (v
 
 function LoginForm() {
   const router = useRouter()
+  const qrReaderRef = useRef<Html5Qrcode | null>(null);
   const searchParams = useSearchParams()
   const defaultTab = searchParams.get("tab") === "register" ? "register" : "login"
   const [activeTab, setActiveTab] = useState(defaultTab)
@@ -187,7 +188,14 @@ function LoginForm() {
         if (res.token) {
           localStorage.setItem("auth_token", res.token);
           localStorage.setItem("auth_type", userType);
-          router.push("/dashboard/patient");
+
+          if (userType === "doctors") {
+            router.push("/dashboard/doctor");
+          } else if (userType === "pharmas" || userType === "laps" || userType === "paramedics") {
+            router.push("/dashboard/facility");
+          } else {
+            router.push("/dashboard/patient");
+          }
         } else {
           setError(res.message || "Invalid OTP code.");
         }
@@ -233,8 +241,15 @@ function LoginForm() {
 
         if (res.token) {
           localStorage.setItem("auth_token", res.token);
-          localStorage.setItem("auth_type", "users"); // QR login defaults to user context
-          router.push("/dashboard/patient");
+          localStorage.setItem("auth_type", res.type || "users");
+
+          if (res.type === "doctors") {
+            router.push("/dashboard/doctor");
+          } else if (res.type === "pharmas" || res.type === "laps" || res.type === "paramedics") {
+            router.push("/dashboard/facility");
+          } else {
+            router.push("/dashboard/patient");
+          }
         } else {
           setError(res.error || "Invalid QR Code.");
         }
@@ -255,7 +270,14 @@ function LoginForm() {
     } else if (token && type) {
       localStorage.setItem("auth_token", token);
       localStorage.setItem("auth_type", type);
-      router.push("/dashboard/patient");
+
+      if (type === "doctors") {
+        router.push("/dashboard/doctor");
+      } else if (type === "pharmas" || type === "laps" || type === "paramedics") {
+        router.push("/dashboard/facility");
+      } else {
+        router.push("/dashboard/patient");
+      }
     }
   }, [searchParams, router]);
 
@@ -269,25 +291,43 @@ function LoginForm() {
 
   // ✅ Initialize QR Scanner
   useEffect(() => {
-    if (view === "qr-scanner") {
-      const scanner = new Html5QrcodeScanner(
-        "qr-reader",
-        { fps: 10, qrbox: { width: 250, height: 250 } },
-        /* verbose= */ false
-      );
+    let isMounted = true;
 
-      scanner.render(
-        (decodedText) => {
-          scanner.clear();
-          handleQrLogin(decodedText);
-        },
-        (error) => {
-          // console.warn(error);
+    if (view === "qr-scanner") {
+      // Small delay to ensure the container is in the DOM
+      const timer = setTimeout(async () => {
+        if (!isMounted) return;
+
+        try {
+          const html5QrCode = new Html5Qrcode("qr-reader");
+          qrReaderRef.current = html5QrCode;
+
+          const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+
+          await html5QrCode.start(
+            { facingMode: "user" }, // Use front camera/laptop cam
+            config,
+            (decodedText) => {
+              html5QrCode.stop().then(() => {
+                handleQrLogin(decodedText);
+              });
+            },
+            (errorMessage) => {
+              // ignore errors
+            }
+          );
+        } catch (err) {
+          console.error("Unable to start scanning.", err);
+          setError("Unable to access camera. Please check permissions.");
         }
-      );
+      }, 300);
 
       return () => {
-        scanner.clear().catch(err => console.error("Failed to clear scanner", err));
+        isMounted = false;
+        clearTimeout(timer);
+        if (qrReaderRef.current && qrReaderRef.current.isScanning) {
+          qrReaderRef.current.stop().catch(e => console.error("Stop failed", e));
+        }
       };
     }
   }, [view]);
@@ -634,7 +674,7 @@ function LoginForm() {
                           fill="#EA4335"
                         />
                       </svg>
-                      Google
+                      Register with Google
                     </Button>
 
                     <p className="text-center text-xs text-muted-foreground">
