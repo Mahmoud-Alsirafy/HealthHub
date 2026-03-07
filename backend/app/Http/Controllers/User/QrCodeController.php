@@ -66,27 +66,37 @@ class QrCodeController extends Controller
      */
     public function loginWithQr(string $code)
     {
-        $user = User::where('qr_code', $code)->first();
+        $guards = [
+            'api'       => \App\Models\User::class,
+            'doctor'    => \App\Models\Doctor::class,
+            'lap'       => \App\Models\Lap::class,
+            'pharma'    => \App\Models\Pharma::class,
+            'paramedic' => \App\Models\Paramedic::class,
+        ];
 
-        if (!$user) {
-            return response()->json([
-                'error' => 'Invalid QR Code',
-            ], 401);
+        foreach ($guards as $guard => $model) {
+            $user = $model::where('qr_code', $code)->first();
+
+            if ($user) {
+                // Generate JWT token for the user
+                $jwtToken = Auth::guard($guard)->login($user);
+
+                return response()->json([
+                    'message' => 'Logged in successfully via QR',
+                    'token'   => $jwtToken,
+                    'type'    => ($guard === 'api' ? 'users' : $guard . 's'),
+                    'user'    => [
+                        'id'    => $user->id,
+                        'name'  => $user->name,
+                        'email' => $user->email,
+                    ],
+                ]);
+            }
         }
 
-        // Generate JWT token for the user
-        $jwtToken = Auth::guard('api')->login($user);
-
         return response()->json([
-            'message' => 'Logged in successfully via QR',
-            'token'   => $jwtToken,
-            'type'    => 'users',
-            'user'    => [
-                'id'    => $user->id,
-                'name'  => $user->name,
-                'email' => $user->email,
-            ],
-        ]);
+            'error' => 'Invalid QR Code',
+        ], 401);
     }
 
     /**
