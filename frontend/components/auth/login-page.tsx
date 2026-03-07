@@ -292,25 +292,31 @@ function LoginForm() {
   // ✅ Initialize QR Scanner
   useEffect(() => {
     let isMounted = true;
+    let html5QrCode: Html5Qrcode | null = null;
 
     if (view === "qr-scanner") {
       // Small delay to ensure the container is in the DOM
       const timer = setTimeout(async () => {
         if (!isMounted) return;
 
+        const container = document.getElementById("qr-reader");
+        if (!container) return;
+
         try {
-          const html5QrCode = new Html5Qrcode("qr-reader");
+          html5QrCode = new Html5Qrcode("qr-reader");
           qrReaderRef.current = html5QrCode;
 
           const config = { fps: 10, qrbox: { width: 250, height: 250 } };
 
           await html5QrCode.start(
-            { facingMode: "user" }, // Use front camera/laptop cam
+            { facingMode: "user" },
             config,
             (decodedText) => {
-              html5QrCode.stop().then(() => {
-                handleQrLogin(decodedText);
-              });
+              if (html5QrCode) {
+                html5QrCode.stop().then(() => {
+                  handleQrLogin(decodedText);
+                }).catch(err => console.error("Failed to stop", err));
+              }
             },
             (errorMessage) => {
               // ignore errors
@@ -320,13 +326,13 @@ function LoginForm() {
           console.error("Unable to start scanning.", err);
           setError("Unable to access camera. Please check permissions.");
         }
-      }, 300);
+      }, 500);
 
       return () => {
         isMounted = false;
         clearTimeout(timer);
-        if (qrReaderRef.current && qrReaderRef.current.isScanning) {
-          qrReaderRef.current.stop().catch(e => console.error("Stop failed", e));
+        if (html5QrCode && html5QrCode.isScanning) {
+          html5QrCode.stop().catch(e => console.error("Stop failed", e));
         }
       };
     }

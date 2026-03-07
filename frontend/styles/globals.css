@@ -126,6 +126,9 @@
 
 #qr-reader {
   border: none !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 250px;
 }
 
 #qr-reader__dashboard {

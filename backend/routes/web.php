@@ -72,6 +72,12 @@ Route::post('reg_form', [\App\Http\Controllers\Auth\registerController::class, '
 Route::post('register', [\App\Http\Controllers\Auth\registerController::class, 'register'])->name('register');
 
 // -----------------------------------------------------------------------------
+// Google Auth (Stable URLs for Frontend)
+// -----------------------------------------------------------------------------
+Route::get('auth/google', [GoogleController::class, 'googlepage'])->name('google.login');
+Route::get('auth/google/callback', [GoogleController::class, 'googlepagecallback'])->name('google.callback');
+
+// -----------------------------------------------------------------------------
 // Commented / Localization (for reference)
 // -----------------------------------------------------------------------------
 //
@@ -102,10 +108,6 @@ Route::group(
         Route::post('qrcode', [Qr_codeController::class, 'generate'])->name('generate');
         Route::get('/qr-login', [Qr_codeController::class, 'loginByQr'])->name('qr.login');
 
-        // Google Auth
-        Route::get('auth/google', [GoogleController::class, 'googlepage']);
-        Route::get('auth/google/callback', [GoogleController::class, 'googlepagecallback']);
-        Route::get('auth/google/check', [GoogleController::class, 'googlepagecheck']);
 
         // Image (extract text from image)
         Route::prefix('image')->group(function () {
