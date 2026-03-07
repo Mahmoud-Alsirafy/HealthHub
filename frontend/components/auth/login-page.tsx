@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { MedLinkLogo } from "@/components/medlink-logo"
 import { Suspense, useRef } from "react"
 import { loginApi, registerApi, verifyOtpApi, resendOtpApi } from "@/lib/api"
-import { Html5Qrcode } from "html5-qrcode"
+import dynamic from "next/dynamic"
 
 // OTP Input Component
 function OtpInput({ value, onChange, length = 6 }: { value: string, onChange: (val: string) => void, length?: number }) {
@@ -67,7 +67,7 @@ function OtpInput({ value, onChange, length = 6 }: { value: string, onChange: (v
 
 function LoginForm() {
   const router = useRouter()
-  const qrReaderRef = useRef<Html5Qrcode | null>(null);
+  const qrReaderRef = useRef<any>(null);
   const searchParams = useSearchParams()
   const defaultTab = searchParams.get("tab") === "register" ? "register" : "login"
   const [activeTab, setActiveTab] = useState(defaultTab)
@@ -292,7 +292,7 @@ function LoginForm() {
   // ✅ Initialize QR Scanner
   useEffect(() => {
     let isMounted = true;
-    let html5QrCode: Html5Qrcode | null = null;
+    let html5QrCode: any = null;
 
     if (view === "qr-scanner") {
       // Small delay to ensure the container is in the DOM
@@ -303,6 +303,11 @@ function LoginForm() {
         if (!container) return;
 
         try {
+          // Import html5-qrcode dynamically to avoid SSR issues
+          const { Html5Qrcode } = await import("html5-qrcode");
+
+          if (!isMounted) return;
+
           html5QrCode = new Html5Qrcode("qr-reader");
           qrReaderRef.current = html5QrCode;
 
@@ -311,14 +316,14 @@ function LoginForm() {
           await html5QrCode.start(
             { facingMode: "user" },
             config,
-            (decodedText) => {
+            (decodedText: string) => {
               if (html5QrCode) {
                 html5QrCode.stop().then(() => {
                   handleQrLogin(decodedText);
-                }).catch(err => console.error("Failed to stop", err));
+                }).catch((err: any) => console.error("Failed to stop", err));
               }
             },
-            (errorMessage) => {
+            (errorMessage: string) => {
               // ignore errors
             }
           );
@@ -332,7 +337,7 @@ function LoginForm() {
         isMounted = false;
         clearTimeout(timer);
         if (html5QrCode && html5QrCode.isScanning) {
-          html5QrCode.stop().catch(e => console.error("Stop failed", e));
+          html5QrCode.stop().catch((e: any) => console.error("Stop failed", e));
         }
       };
     }
