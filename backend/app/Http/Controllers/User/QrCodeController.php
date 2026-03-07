@@ -94,10 +94,8 @@ class QrCodeController extends Controller
      */
     private function generateQrBase64(string $code): string
     {
-        $loginUrl = config('app.url') . '/api/qr/login/' . $code;
-
         $writer = new PngWriter();
-        $qrCode = QrCode::create($loginUrl)
+        $qrCode = QrCode::create($code)
             ->setSize(300)
             ->setMargin(10);
 
@@ -111,10 +109,8 @@ class QrCodeController extends Controller
      */
     private function sendQrToEmail($user)
     {
-        $loginUrl = config('app.url') . '/api/qr/login/' . $user->qr_code;
-
         $writer = new PngWriter();
-        $qrCode = QrCode::create($loginUrl)
+        $qrCode = QrCode::create($user->qr_code)
             ->setSize(300)
             ->setMargin(10);
 
@@ -129,7 +125,7 @@ class QrCodeController extends Controller
         }
 
         // Save the image
-        Storage::disk('local')->put($relativePath, $result->getString());
+        Storage::disk('QR')->put($fileName, $result->getString());
 
         // Send Email
         Mail::to($user->email)->send(new SendQrMail(
