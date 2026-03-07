@@ -51,13 +51,6 @@ return [
                 'throw' => false,
                 'report' => false,
             ],
-            'QR' => [
-                'driver' => 'local',
-                'root' => storage_path('app/QR'),
-                'serve' => true,
-                'throw' => false,
-                'report' => false,
-            ],
 
             'public' => [
                 'driver' => 'local',

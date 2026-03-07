@@ -33,6 +33,6 @@ class SendQrMail extends Mailable implements ShouldQueue
                 'nationality_id' => $this->nationality_id,
                 'encryptedData' => $this->encryptedData, // 🆕 نبعثها للواجهة
             ])
-            ->attach(storage_path('app/QR/' . basename($this->filePath)));
+            ->attach(storage_path('app/' . $this->filePath));
     }
 }
