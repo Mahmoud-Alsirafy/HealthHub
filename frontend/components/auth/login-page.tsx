@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { MedLinkLogo } from "@/components/medlink-logo"
 import { Suspense, useRef } from "react"
 import { loginApi, registerApi, verifyOtpApi, resendOtpApi } from "@/lib/api"
+import { Html5QrcodeScanner } from "html5-qrcode"
 
 // OTP Input Component
 function OtpInput({ value, onChange, length = 6 }: { value: string, onChange: (val: string) => void, length?: number }) {
@@ -266,6 +267,31 @@ function LoginForm() {
     window.location.href = `${baseUrl}/auth/google`;
   };
 
+  // ✅ Initialize QR Scanner
+  useEffect(() => {
+    if (view === "qr-scanner") {
+      const scanner = new Html5QrcodeScanner(
+        "qr-reader",
+        { fps: 10, qrbox: { width: 250, height: 250 } },
+        /* verbose= */ false
+      );
+
+      scanner.render(
+        (decodedText) => {
+          scanner.clear();
+          handleQrLogin(decodedText);
+        },
+        (error) => {
+          // console.warn(error);
+        }
+      );
+
+      return () => {
+        scanner.clear().catch(err => console.error("Failed to clear scanner", err));
+      };
+    }
+  }, [view]);
+
   return (
     <div className="min-h-screen bg-background flex">
       {/* Left side - branding */}
@@ -382,24 +408,8 @@ function LoginForm() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="aspect-square w-full bg-muted rounded-2xl border-2 border-dashed flex flex-col items-center justify-center relative overflow-hidden">
-                  <div className="absolute inset-0 bg-primary/5 animate-pulse" />
-                  <QrCode className="h-20 w-20 text-muted-foreground/20 relative z-10" />
-                  <p className="text-xs text-muted-foreground mt-4 relative z-10">Accessing Camera...</p>
-
-                  {/* Real implementation would use html5-qrcode here */}
-                  <div className="absolute bottom-4 left-0 right-0 px-4">
-                    <p className="text-[10px] text-center text-muted-foreground mb-2 italic">Developer: Enter code manually for testing</p>
-                    <Input
-                      placeholder="Paste QR Code String"
-                      className="h-8 text-[10px]"
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          handleQrLogin((e.target as HTMLInputElement).value);
-                        }
-                      }}
-                    />
-                  </div>
+                <div className="aspect-square w-full bg-muted rounded-2xl border-2 border-dashed relative overflow-hidden flex items-center justify-center">
+                  <div id="qr-reader" className="w-full h-full"></div>
                 </div>
 
                 {error && <div className="p-3 text-sm bg-destructive/10 text-destructive rounded-md">{error}</div>}
