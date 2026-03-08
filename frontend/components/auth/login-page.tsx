@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useTransition } from "react"
+import { useState, useTransition, useEffect } from "react"
 import Link from "next/link"
 import { useSearchParams, useRouter } from "next/navigation"
 import { Eye, EyeOff, Shield, ArrowLeft, Loader2, QrCode, Mail } from "lucide-react"
@@ -259,8 +259,7 @@ function LoginForm() {
     });
   };
 
-<<<<<<< HEAD
-=======
+
   // ✅ Check for token in URL (Google Auth Callback)
   useEffect(() => {
     const token = searchParams.get("token");
@@ -283,7 +282,7 @@ function LoginForm() {
     }
   }, [searchParams, router]);
 
->>>>>>> master
+
   // ✅ Google Login (Redirect to API)
   const handleGoogleLogin = () => {
     // In a real implementation, this would redirect to the Laravel Socialite route
@@ -659,8 +658,7 @@ function LoginForm() {
                       Create Account
                     </Button>
 
-<<<<<<< HEAD
-=======
+
                     <div className="relative my-4">
                       <div className="absolute inset-0 flex items-center">
                         <span className="w-full border-t border-border" />
@@ -692,7 +690,7 @@ function LoginForm() {
                       Register with Google
                     </Button>
 
->>>>>>> master
+
                     <p className="text-center text-xs text-muted-foreground">
                       By registering, you agree to our Terms of Service and Privacy Policy
                     </p>
