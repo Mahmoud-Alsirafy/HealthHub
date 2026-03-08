@@ -147,13 +147,15 @@ class ProfileController extends Controller
             return response()->json(['error' => 'There is no patient profile'], 404);
         }
 
-        $file = $profile->images()->where('imageable_id', $id)->first();
+        // The $id passed here is the ID of the Image record.
+        $file = $profile->images()->where('id', $id)->first();
 
         if (!$file) {
             return response()->json(['error' => 'File not found'], 404);
         }
 
-        $this->deleteFile($profile->id, 'PatientProfile');
+        // Delete the physical file for this specific record
+        $this->deleteFileByRecord($file, 'PatientProfile');
         $file->delete();
 
         return response()->json([
