@@ -95,20 +95,13 @@ Route::group(
 
 
 
-<<<<<<< HEAD
         // Google Auth
         Route::get('auth/google', [GoogleController::class, 'googlepage']);
         Route::get('auth/google/callback', [GoogleController::class, 'googlepagecallback']);
         Route::get('auth/google/check', [GoogleController::class, 'googlepagecheck']);
-=======
 
 
 
-        // OTP
-
-
-        // QR
->>>>>>> master
 
         // Image (extract text from image)
         Route::prefix('image')->group(function () {
