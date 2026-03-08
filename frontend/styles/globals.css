@@ -123,31 +123,3 @@
     @apply bg-background text-foreground;
   }
 }
-
-#qr-reader {
-  border: none !important;
-  width: 100% !important;
-  height: 100% !important;
-  min-height: 250px;
-}
-
-#qr-reader__dashboard {
-  padding: 10px !important;
-}
-
-#qr-reader__status_span {
-  display: none !important;
-}
-
-#qr-reader video {
-  border-radius: 1rem !important;
-  object-fit: cover !important;
-}
-
-#qr-reader__scan_region {
-  background: transparent !important;
-}
-
-#qr-reader button {
-  @apply inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 mt-4;
-}

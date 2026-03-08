@@ -184,53 +184,37 @@ export default function PatientDashboardContent() {
   }, [fetchData, token])
 
   const handleUpdateProfile = async () => {
-  if (!token) return
-  setLoading(true)
-  try {
-    const basicRes = await updateBasicProfileApi(token, { name, national_id: nationalId })
-    
-    // ✅ تحقق من الـ response
-    if (basicRes.errors) {
+    if (!token) return
+    setLoading(true)
+    try {
+      await updateBasicProfileApi(token, { name, national_id: nationalId })
+      await updatePatientProfileApi(token, {
+        phone,
+        phone_alt: phoneAlt,
+        birth_date: birthDate,
+        gender,
+        blood_type: bloodType,
+        height: height ? parseFloat(height) : undefined,
+        weight: weight ? parseFloat(weight) : undefined,
+        chronic_diseases: chronicDiseases,
+        allergies,
+        current_medications: currentMedications,
+      })
+      toast({
+        title: "Success",
+        description: "Your profile has been updated successfully.",
+      })
+      fetchData()
+    } catch (error) {
       toast({
         title: "Error",
-        description: Object.values(basicRes.errors).flat().join(", "),
+        description: "Failed to update profile. Please try again.",
         variant: "destructive",
       })
+    } finally {
       setLoading(false)
-      return
     }
-
-    const patientRes = await updatePatientProfileApi(token, {
-      phone,
-      phone_alt: phoneAlt,
-      birth_date: birthDate,
-      gender,
-      blood_type: bloodType,
-      height: height ? parseFloat(height) : undefined,
-      weight: weight ? parseFloat(weight) : undefined,
-      chronic_diseases: chronicDiseases,
-      allergies,
-      current_medications: currentMedications,
-    })
-
-    if (patientRes.errors) {
-      toast({
-        title: "Error",
-        description: Object.values(patientRes.errors).flat().join(", "),
-        variant: "destructive",
-      })
-      setLoading(false)
-      return
-    }
-
-    toast({ title: "Success", description: "Profile updated successfully." })
-    fetchData()
-  } catch (error) {
-    toast({ title: "Error", description: "Something went wrong.", variant: "destructive" })
-  } finally {
-    setLoading(false)
   }
-}
 
   const handleUploadFile = async () => {
     if (!token || selectedFiles.length === 0 || !fileType || !fileTitle) {

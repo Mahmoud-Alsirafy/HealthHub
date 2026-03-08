@@ -71,10 +71,6 @@ Route::get('/paramedics', function () {
 Route::post('reg_form', [\App\Http\Controllers\Auth\registerController::class, 'reg_form'])->name('reg_form');
 Route::post('register', [\App\Http\Controllers\Auth\registerController::class, 'register'])->name('register');
 
-// Google Auth — top-level, no localization middleware (must match GOOGLE_REDIRECT in .env)
-Route::get('/auth/google', [GoogleController::class, 'googlepage'])->name('google.login');
-Route::get('/auth/google/callback', [GoogleController::class, 'googlepagecallback'])->name('google.callback');
-
 // -----------------------------------------------------------------------------
 // Commented / Localization (for reference)
 // -----------------------------------------------------------------------------
@@ -95,20 +91,10 @@ Route::group(
 
 
 
-<<<<<<< HEAD
         // Google Auth
         Route::get('auth/google', [GoogleController::class, 'googlepage']);
         Route::get('auth/google/callback', [GoogleController::class, 'googlepagecallback']);
         Route::get('auth/google/check', [GoogleController::class, 'googlepagecheck']);
-=======
-
-
-
-        // OTP
-
-
-        // QR
->>>>>>> master
 
         // Image (extract text from image)
         Route::prefix('image')->group(function () {
