@@ -114,7 +114,7 @@ export default function PatientDashboardContent() {
 
   // File upload states
   const [uploadLoading, setUploadLoading] = useState(false)
-  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([])
   const [fileType, setFileType] = useState("")
   const [fileTitle, setFileTitle] = useState("")
 
@@ -217,10 +217,10 @@ export default function PatientDashboardContent() {
   }
 
   const handleUploadFile = async () => {
-    if (!token || !selectedFile || !fileType || !fileTitle) {
+    if (!token || selectedFiles.length === 0 || !fileType || !fileTitle) {
       toast({
         title: "Validation Error",
-        description: "Please fill all required fields and select a file.",
+        description: "Please fill all required fields and select at least one file.",
         variant: "destructive",
       })
       return
@@ -229,7 +229,9 @@ export default function PatientDashboardContent() {
     setUploadLoading(true)
     try {
       const formData = new FormData()
-      formData.append("files[]", selectedFile)
+      selectedFiles.forEach((file) => {
+        formData.append("files[]", file)
+      })
       formData.append("type", fileType)
       formData.append("title", fileTitle)
 
@@ -237,9 +239,9 @@ export default function PatientDashboardContent() {
       if (res.message) {
         toast({
           title: "Success",
-          description: "Medical file uploaded successfully.",
+          description: "Medical file(s) uploaded successfully.",
         })
-        setSelectedFile(null)
+        setSelectedFiles([])
         setFileTitle("")
         setFileType("")
         fetchData()
@@ -272,6 +274,26 @@ export default function PatientDashboardContent() {
         description: "Failed to delete file.",
         variant: "destructive",
       })
+    }
+  }
+
+  const handleDownloadFile = async (file: any) => {
+    try {
+      const url = getFileUrl(file)
+      const res = await fetch(url)
+      const blob = await res.blob()
+      const blobUrl = window.URL.createObjectURL(blob)
+      const link = document.createElement("a")
+      link.href = blobUrl
+      link.download = file.filename
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(blobUrl)
+    } catch (error) {
+      console.error("Download error:", error)
+      // Fallback to direct link if fetch fails
+      window.open(getFileUrl(file), '_blank')
     }
   }
 
@@ -472,16 +494,36 @@ export default function PatientDashboardContent() {
                       </Select>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="fileInput">Choose File</Label>
+                      <Label htmlFor="fileInput">Choose Files</Label>
                       <Input
                         id="fileInput"
                         type="file"
+                        multiple
                         accept=".jpg,.jpeg,.png,.pdf"
                         className="cursor-pointer"
-                        onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+                        onChange={(e) => {
+                          const files = Array.from(e.target.files || [])
+                          setSelectedFiles(files)
+                        }}
                       />
                     </div>
                   </div>
+                  {selectedFiles.length > 0 && (
+                    <div className="mt-4 p-3 bg-muted/50 rounded-xl border border-dashed border-primary/20">
+                      <p className="text-xs font-semibold mb-2 flex items-center gap-2">
+                        <FileText className="h-3 w-3 text-primary" />
+                        Selected Files ({selectedFiles.length}):
+                      </p>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2">
+                        {selectedFiles.map((f, i) => (
+                          <div key={i} className="flex items-center justify-between text-[10px] bg-background p-2 rounded-lg border border-border">
+                            <span className="truncate max-w-[100px]">{f.name}</span>
+                            <span className="text-muted-foreground">{(f.size / 1024).toFixed(0)} KB</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                   <div className="mt-4 flex justify-end">
                     <Button onClick={handleUploadFile} disabled={uploadLoading} className="bg-primary hover:bg-primary/90">
                       {uploadLoading ? "Uploading..." : "Upload to Records"}
@@ -536,11 +578,14 @@ export default function PatientDashboardContent() {
                               >
                                 Preview
                               </Button>
-                              <a href={getFileUrl(file)} download={file.filename} className="block">
-                                <Button variant="secondary" size="icon" className="h-9 w-9 rounded-xl">
-                                  <Download className="h-4 w-4" />
-                                </Button>
-                              </a>
+                              <Button
+                                variant="secondary"
+                                size="icon"
+                                className="h-9 w-9 rounded-xl"
+                                onClick={() => handleDownloadFile(file)}
+                              >
+                                <Download className="h-4 w-4" />
+                              </Button>
                             </div>
                           </div>
                         </div>

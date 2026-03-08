@@ -38,7 +38,15 @@ trait AttachFiles
 
         if (Storage::disk('upload_attachments')->exists($path)) {
             Storage::disk('upload_attachments')->deleteDirectory($path);
-            Image::where('imageable_id', $id)->delete();
+        }
+    }
+
+    public function deleteFileByRecord($image, $folder)
+    {
+        $path = 'attachments/' . $folder . '/' . $image->imageable_id . '/' . $image->filename;
+
+        if (Storage::disk('upload_attachments')->exists($path)) {
+            Storage::disk('upload_attachments')->delete($path);
         }
     }
 }
