@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { MedLinkLogo } from "@/components/medlink-logo"
 import { Suspense, useRef } from "react"
 import { loginApi, registerApi, verifyOtpApi, resendOtpApi } from "@/lib/api"
+import dynamic from "next/dynamic"
 
 // OTP Input Component
 function OtpInput({ value, onChange, length = 6 }: { value: string, onChange: (val: string) => void, length?: number }) {
@@ -66,6 +67,7 @@ function OtpInput({ value, onChange, length = 6 }: { value: string, onChange: (v
 
 function LoginForm() {
   const router = useRouter()
+  const qrReaderRef = useRef<any>(null);
   const searchParams = useSearchParams()
   const defaultTab = searchParams.get("tab") === "register" ? "register" : "login"
   const [activeTab, setActiveTab] = useState(defaultTab)
@@ -186,7 +188,14 @@ function LoginForm() {
         if (res.token) {
           localStorage.setItem("auth_token", res.token);
           localStorage.setItem("auth_type", userType);
-          router.push("/dashboard/patient");
+
+          if (userType === "doctors") {
+            router.push("/dashboard/doctor");
+          } else if (userType === "pharmas" || userType === "laps" || userType === "paramedics") {
+            router.push("/dashboard/facility");
+          } else {
+            router.push("/dashboard/patient");
+          }
         } else {
           setError(res.message || "Invalid OTP code.");
         }
@@ -232,8 +241,15 @@ function LoginForm() {
 
         if (res.token) {
           localStorage.setItem("auth_token", res.token);
-          localStorage.setItem("auth_type", "users"); // QR login defaults to user context
-          router.push("/dashboard/patient");
+          localStorage.setItem("auth_type", res.type || "users");
+
+          if (res.type === "doctors") {
+            router.push("/dashboard/doctor");
+          } else if (res.type === "pharmas" || res.type === "laps" || res.type === "paramedics") {
+            router.push("/dashboard/facility");
+          } else {
+            router.push("/dashboard/patient");
+          }
         } else {
           setError(res.error || "Invalid QR Code.");
         }
@@ -243,12 +259,91 @@ function LoginForm() {
     });
   };
 
+<<<<<<< HEAD
+=======
+  // ✅ Check for token in URL (Google Auth Callback)
+  useEffect(() => {
+    const token = searchParams.get("token");
+    const type = searchParams.get("type");
+    const errorParam = searchParams.get("error");
+
+    if (errorParam) {
+      setError("Google authentication failed.");
+    } else if (token && type) {
+      localStorage.setItem("auth_token", token);
+      localStorage.setItem("auth_type", type);
+
+      if (type === "doctors") {
+        router.push("/dashboard/doctor");
+      } else if (type === "pharmas" || type === "laps" || type === "paramedics") {
+        router.push("/dashboard/facility");
+      } else {
+        router.push("/dashboard/patient");
+      }
+    }
+  }, [searchParams, router]);
+
+>>>>>>> master
   // ✅ Google Login (Redirect to API)
   const handleGoogleLogin = () => {
     // In a real implementation, this would redirect to the Laravel Socialite route
     // window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/auth/google/redirect`;
     alert("Google login setup required in backend (Socialite).");
   };
+
+  // ✅ Initialize QR Scanner
+  useEffect(() => {
+    let isMounted = true;
+    let html5QrCode: any = null;
+
+    if (view === "qr-scanner") {
+      // Small delay to ensure the container is in the DOM
+      const timer = setTimeout(async () => {
+        if (!isMounted) return;
+
+        const container = document.getElementById("qr-reader");
+        if (!container) return;
+
+        try {
+          // Import html5-qrcode dynamically to avoid SSR issues
+          const { Html5Qrcode } = await import("html5-qrcode");
+
+          if (!isMounted) return;
+
+          html5QrCode = new Html5Qrcode("qr-reader");
+          qrReaderRef.current = html5QrCode;
+
+          const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+
+          await html5QrCode.start(
+            { facingMode: "user" },
+            config,
+            (decodedText: string) => {
+              if (html5QrCode) {
+                html5QrCode.stop().then(() => {
+                  handleQrLogin(decodedText);
+                }).catch((err: any) => console.error("Failed to stop", err));
+              }
+            },
+            (errorMessage: string) => {
+              // ignore errors
+            }
+          );
+        } catch (err) {
+          console.error("Unable to start scanning.", err);
+          setError("Unable to access camera. Please check permissions.");
+        }
+      }, 500);
+
+      return () => {
+        isMounted = false;
+        clearTimeout(timer);
+        if (html5QrCode && html5QrCode.isScanning) {
+          html5QrCode.stop().catch((e: any) => console.error("Stop failed", e));
+        }
+      };
+    }
+  }, [view]);
 
   return (
     <div className="min-h-screen bg-background flex">
@@ -366,24 +461,8 @@ function LoginForm() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="aspect-square w-full bg-muted rounded-2xl border-2 border-dashed flex flex-col items-center justify-center relative overflow-hidden">
-                  <div className="absolute inset-0 bg-primary/5 animate-pulse" />
-                  <QrCode className="h-20 w-20 text-muted-foreground/20 relative z-10" />
-                  <p className="text-xs text-muted-foreground mt-4 relative z-10">Accessing Camera...</p>
-
-                  {/* Real implementation would use html5-qrcode here */}
-                  <div className="absolute bottom-4 left-0 right-0 px-4">
-                    <p className="text-[10px] text-center text-muted-foreground mb-2 italic">Developer: Enter code manually for testing</p>
-                    <Input
-                      placeholder="Paste QR Code String"
-                      className="h-8 text-[10px]"
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          handleQrLogin((e.target as HTMLInputElement).value);
-                        }
-                      }}
-                    />
-                  </div>
+                <div className="aspect-square w-full bg-muted rounded-2xl border-2 border-dashed relative overflow-hidden flex items-center justify-center">
+                  <div id="qr-reader" className="w-full h-full"></div>
                 </div>
 
                 {error && <div className="p-3 text-sm bg-destructive/10 text-destructive rounded-md">{error}</div>}
@@ -580,6 +659,40 @@ function LoginForm() {
                       Create Account
                     </Button>
 
+<<<<<<< HEAD
+=======
+                    <div className="relative my-4">
+                      <div className="absolute inset-0 flex items-center">
+                        <span className="w-full border-t border-border" />
+                      </div>
+                      <div className="relative flex justify-center text-xs uppercase">
+                        <span className="bg-card px-2 text-muted-foreground">Or register with</span>
+                      </div>
+                    </div>
+
+                    <Button variant="outline" type="button" className="w-full h-11 font-semibold" onClick={handleGoogleLogin}>
+                      <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
+                        <path
+                          d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                          fill="#4285F4"
+                        />
+                        <path
+                          d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                          fill="#34A853"
+                        />
+                        <path
+                          d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.28.81-.56z"
+                          fill="#FBBC05"
+                        />
+                        <path
+                          d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                          fill="#EA4335"
+                        />
+                      </svg>
+                      Register with Google
+                    </Button>
+
+>>>>>>> master
                     <p className="text-center text-xs text-muted-foreground">
                       By registering, you agree to our Terms of Service and Privacy Policy
                     </p>
