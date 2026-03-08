@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\registerController;
+use App\Http\Controllers\Doctor\DoctorController;
 use App\Http\Controllers\OtpController;
 use App\Http\Controllers\User\ProfileController;
 use App\Http\Controllers\User\QrCodeController;
@@ -62,7 +63,7 @@ Route::middleware('auth:api')->prefix('user')->group(function () {
 Route::middleware('auth:doctor')->prefix('doctor')->group(function () {
 
     Route::post('/logout', [LoginController::class, 'logout'])->name('api.doctor.logout');
-    Route::get('/me', [LoginController::class, 'me'])->name('api.doctor.me');
+    Route::get('/me', [DoctorController::class, 'me'])->name('api.doctor.me');
 });
 
 // -------------------------------------------------------

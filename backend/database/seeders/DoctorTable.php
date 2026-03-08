@@ -16,9 +16,13 @@ class DoctorTable extends Seeder
     {
         DB::table('doctors')->delete();
         Doctor::create([
-            'name' => 'doctor',
-            'email' => 'wael@gmail.com',
-            'password' => Hash::make('1234567890'),
+            'name'     => 'Dr. Sarah El-Sayed',
+            'email'    => 'wael@gmail.com',
+            'password' => bcrypt('123'),
+            'specialty' => 'Cardiologist',
+            'facility'  => 'Cairo University Hospital',
+            'department' => 'Cardiology',
+            'experience_years' => 10,
         ]);
     }
 }

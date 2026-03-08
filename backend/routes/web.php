@@ -91,17 +91,6 @@ Route::group(
 
 
 
-
-
-
-        // OTP
-
-
-        // QR
-        Route::resource('qrcode', Qr_codeController::class);
-        Route::post('qrcode', [Qr_codeController::class, 'generate'])->name('generate');
-        Route::get('/qr-login', [Qr_codeController::class, 'loginByQr'])->name('qr.login');
-
         // Google Auth
         Route::get('auth/google', [GoogleController::class, 'googlepage']);
         Route::get('auth/google/callback', [GoogleController::class, 'googlepagecallback']);

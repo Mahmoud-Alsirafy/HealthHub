@@ -6,23 +6,37 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('doctors', function (Blueprint $table) {
             $table->id();
+
+            // Auth
             $table->string('name');
             $table->string('email')->unique();
             $table->string('password');
+            $table->string('code')->nullable();
+            $table->datetime('expierd_at')->nullable();
+            $table->string('qr_code', 64)->nullable()->unique();
+
+            // بيانات شخصية
+            $table->string('phone')->nullable();
+            $table->string('national_id')->nullable()->unique();
+            $table->date('birth_date')->nullable();
+            $table->enum('gender', ['male', 'female'])->nullable();
+
+            // بيانات مهنية
+            $table->string('specialty')->nullable();        // تخصص: Cardiologist
+            $table->string('facility')->nullable();         // المستشفى: Cairo University Hospital
+            $table->string('department')->nullable();       // القسم: Cardiology
+            $table->string('license_number')->nullable();   // رقم الترخيص
+            $table->integer('experience_years')->nullable(); // سنوات الخبرة
+
+            $table->rememberToken();
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('doctors');
