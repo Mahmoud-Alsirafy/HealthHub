@@ -71,11 +71,9 @@ Route::get('/paramedics', function () {
 Route::post('reg_form', [\App\Http\Controllers\Auth\registerController::class, 'reg_form'])->name('reg_form');
 Route::post('register', [\App\Http\Controllers\Auth\registerController::class, 'register'])->name('register');
 
-// -----------------------------------------------------------------------------
-// Google Auth (Stable URLs for Frontend)
-// -----------------------------------------------------------------------------
-Route::get('auth/google', [GoogleController::class, 'googlepage'])->name('google.login');
-Route::get('auth/google/callback', [GoogleController::class, 'googlepagecallback'])->name('google.callback');
+// Google Auth — top-level, no localization middleware (must match GOOGLE_REDIRECT in .env)
+Route::get('/auth/google', [GoogleController::class, 'googlepage'])->name('google.login');
+Route::get('/auth/google/callback', [GoogleController::class, 'googlepagecallback'])->name('google.callback');
 
 // -----------------------------------------------------------------------------
 // Commented / Localization (for reference)
@@ -104,10 +102,6 @@ Route::group(
 
 
         // QR
-        Route::resource('qrcode', Qr_codeController::class);
-        Route::post('qrcode', [Qr_codeController::class, 'generate'])->name('generate');
-        Route::get('/qr-login', [Qr_codeController::class, 'loginByQr'])->name('qr.login');
-
 
         // Image (extract text from image)
         Route::prefix('image')->group(function () {
