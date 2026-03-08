@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\DoctorReport;
 use App\Traits\HasOtp;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -13,15 +14,28 @@ class User extends Authenticatable implements JWTSubject
     use HasFactory, Notifiable, HasOtp;
 
     protected $fillable = [
-        'name', 'email', 'password', 'national_id', 'code', 'qr_code', 'expierd_at',
+        'name',
+        'email',
+        'password',
+        'national_id',
+        'code',
+        'qr_code',
+        'expierd_at',
     ];
 
     protected $hidden = [
-        'password', 'remember_token', 'code', 'expierd_at',
+        'password',
+        'remember_token',
+        'code',
+        'expierd_at',
     ];
 
     protected $visible = [
-        'id', 'name', 'email', 'national_id', 'profile',
+        'id',
+        'name',
+        'email',
+        'national_id',
+        'profile',
     ];
 
     protected function casts(): array
@@ -41,6 +55,12 @@ class User extends Authenticatable implements JWTSubject
         return $this->hasOne(PatientProfile::class);
     }
 
+
+    public function doctorReports()
+    {
+        return $this->hasMany(DoctorReport::class);
+    }
+
     // -------------------------------------------------------
     // JWT
     // -------------------------------------------------------
@@ -55,17 +75,17 @@ class User extends Authenticatable implements JWTSubject
     }
 
     protected static function booted(): void
-{
-    static::deleting(function (User $user) {
-        if ($user->profile) {
-            // حذف الصور من الـ storage
-            foreach ($user->profile->images as $image) {
-                \Illuminate\Support\Facades\Storage::disk('upload_attachments')
-                    ->delete('attachments/PatientProfile/' . $user->profile->id . '/' . $image->filename);
-                $image->delete();
+    {
+        static::deleting(function (User $user) {
+            if ($user->profile) {
+                // حذف الصور من الـ storage
+                foreach ($user->profile->images as $image) {
+                    \Illuminate\Support\Facades\Storage::disk('upload_attachments')
+                        ->delete('attachments/PatientProfile/' . $user->profile->id . '/' . $image->filename);
+                    $image->delete();
+                }
+                $user->profile->delete();
             }
-            $user->profile->delete();
-        }
-    });
-}
+        });
+    }
 }

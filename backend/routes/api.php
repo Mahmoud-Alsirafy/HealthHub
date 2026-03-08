@@ -64,6 +64,14 @@ Route::middleware('auth:doctor')->prefix('doctor')->group(function () {
 
     Route::post('/logout', [LoginController::class, 'logout'])->name('api.doctor.logout');
     Route::get('/me', [DoctorController::class, 'me'])->name('api.doctor.me');
+    Route::get('/patients', [DoctorController::class, 'myPatients']);
+
+    // ✅ بحث
+    Route::post('/patients/search', [DoctorController::class, 'searchPatient']);
+    Route::get('/patients/qr/{code}', [DoctorController::class, 'searchByQr']);
+
+    // ✅ إضافة تقرير
+    Route::post('/reports', [DoctorController::class, 'storeReport']);
 });
 
 // -------------------------------------------------------
