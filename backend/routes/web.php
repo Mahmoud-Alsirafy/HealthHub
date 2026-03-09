@@ -1,16 +1,11 @@
 <?php
 
-use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Image\ImageController;
 use App\Http\Controllers\Google\GoogleController;
-use App\Http\Controllers\HomeController;
-use App\Http\Controllers\OtpController;
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\QR_CODE\Qr_codeController;
+
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
-use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
 
 // -----------------------------------------------------------------------------
 // Public
@@ -71,6 +66,12 @@ Route::get('/paramedics', function () {
 Route::post('reg_form', [\App\Http\Controllers\Auth\registerController::class, 'reg_form'])->name('reg_form');
 Route::post('register', [\App\Http\Controllers\Auth\registerController::class, 'register'])->name('register');
 
+<<<<<<< HEAD
+=======
+// Google Auth
+// (Moved into localized group below)
+
+>>>>>>> origin/master
 // -----------------------------------------------------------------------------
 // Commented / Localization (for reference)
 // -----------------------------------------------------------------------------
@@ -92,9 +93,19 @@ Route::group(
 
 
         // Google Auth
+<<<<<<< HEAD
         Route::get('auth/google', [GoogleController::class, 'googlepage']);
         Route::get('auth/google/callback', [GoogleController::class, 'googlepagecallback']);
         Route::get('auth/google/check', [GoogleController::class, 'googlepagecheck']);
+=======
+        Route::get('auth/google', [GoogleController::class, 'googlepage'])->name('google.login');
+        Route::get('auth/google/callback', [GoogleController::class, 'googlepagecallback'])->name('google.callback');
+
+        // ✅ أضف ده عشان Google Console فيه /en/
+        Route::get('en/auth/google/callback', [GoogleController::class, 'googlepagecallback']);
+
+
+>>>>>>> origin/master
 
         // Image (extract text from image)
         Route::prefix('image')->group(function () {

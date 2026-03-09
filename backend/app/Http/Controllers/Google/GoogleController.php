@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers\Google;
 
-use DB;
-use Exception;
+use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Notifications\Otp;
-use App\Http\Controllers\Controller;
+use DB;
+use Exception;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -14,59 +15,74 @@ use Laravel\Socialite\Facades\Socialite;
 
 class GoogleController extends Controller
 {
-    public function googlepage()
-    {
-
-        return Socialite::driver('google')->stateless()->redirect();
-    }
-
-    public function googlepagecallback()
+    public function googlepage(Request $request)
 {
+    $type = $request->type ?? 'users';
+
+    // ✅ استخدم state بدل session عشان stateless
+    return Socialite::driver('google')
+        ->stateless()
+        ->with(['state' => $type])
+        ->redirect();
+}
+
+public function googlepagecallback(Request $request)
+{
+    $frontendUrl = env('FRONTEND_URL', 'http://localhost:3000');
+
+    // ✅ جيب الـ type من الـ state مش من الـ session
+    $type = $request->input('state', 'users');
+
+    $guardMap = [
+        'users'      => ['guard' => 'api',      'model' => \App\Models\User::class],
+        'doctors'    => ['guard' => 'doctor',    'model' => \App\Models\Doctor::class],
+        'pharmas'    => ['guard' => 'pharma',    'model' => \App\Models\Pharma::class],
+        'laps'       => ['guard' => 'lap',       'model' => \App\Models\Lap::class],
+        'paramedics' => ['guard' => 'paramedic', 'model' => \App\Models\Paramedic::class],
+    ];
+
+    // ✅ تأكد إن الـ type صح
+    $config = $guardMap[$type] ?? $guardMap['users'];
+
+    $finduser = null; // ✅ عشان الـ catch ميعملش error
+
     try {
         DB::beginTransaction();
 
         $googleUser = Socialite::driver('google')->stateless()->user();
 
-        $finduser = User::where('email', $googleUser->email)->first();
+        $finduser = $config['model']::where('email', $googleUser->email)->first();
 
-        // 1) لو الإيميل مش موجود → اعمله Create + Login + OTP
         if (!$finduser) {
-            $authUser = User::create([
-                'name' => $googleUser->name,
-                'email' => $googleUser->email,
+            // ✅ users بس اللي بيعملوا register بنفسهم
+            if ($type !== 'users') {
+                return redirect($frontendUrl . '/login?error=account_not_found&type=' . $type);
+            }
+
+            $finduser = $config['model']::create([
+                'name'     => $googleUser->name,
+                'email'    => $googleUser->email,
                 'password' => Hash::make(Str::random(16)),
+                'qr_code'  => Str::random(64),
             ]);
-
-            Auth::login($authUser);
-
-            $authUser->generate_code();
-            $authUser->notify(new Otp());
-
-            DB::commit();
-            return redirect()->route('OTP.index');
         }
 
-        // 2) لو موجود + كان مسجل بجوجل قبل كده (password null)
-        if ($finduser) {
-            $authUser = $finduser;
+        $token = Auth::guard($config['guard'])->login($finduser);
 
-            Auth::login($authUser);
+        DB::commit();
 
-            $authUser->generate_code();
-            $authUser->notify(new Otp());
+        $finduser->generate_code();
+        $finduser->notify(new \App\Notifications\Otp());
 
-            DB::commit();
-            return redirect()->route('OTP.index');
-        }
-
-        // 3) لو عنده باسورد → لازم يدخل بحسابه العادي
-        toastr()->error('Try Normal Login, This account registered before by password.');
-        return redirect()->route('login');
+        // ✅ رجّع الـ token مع الـ redirect
+        return redirect($frontendUrl . '/login?id=' . $finduser->id . '&type=' . $type . '&otp=true');
 
     } catch (Exception $e) {
         DB::rollBack();
-        dd($e->getMessage());
+
+        // ✅ مشكلة واحدة بس في الـ catch
+        $userId = $finduser?->id ?? '';
+        return redirect($frontendUrl . '/login?error=google_auth_failed&id=' . $userId . '&type=' . $type);
     }
 }
-
 }

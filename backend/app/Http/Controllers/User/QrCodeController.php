@@ -92,7 +92,7 @@ class QrCodeController extends Controller
     /**
      * Helper: Generate Base64 image string for the QR code.
      */
-    private function generateQrBase64(string $code): string
+    protected function generateQrBase64(string $code): string
     {
         $loginUrl = config('app.url') . '/api/qr/login/' . $code;
 
@@ -119,7 +119,7 @@ class QrCodeController extends Controller
             ->setMargin(10);
 
         $result = $writer->write($qrCode);
-        
+
         $fileName = 'qr_' . $user->id . '_' . time() . '.png';
         $relativePath = 'QR/' . $fileName; // storage/app/QR/...
 
@@ -133,9 +133,9 @@ class QrCodeController extends Controller
 
         // Send Email
         Mail::to($user->email)->send(new SendQrMail(
-            $relativePath, 
-            $user->national_id, 
-            $user->name, 
+            $relativePath,
+            $user->national_id,
+            $user->name,
             $user->qr_code
         ));
     }
