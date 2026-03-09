@@ -92,8 +92,9 @@ Route::group(
         // Google Auth
         Route::get('auth/google', [GoogleController::class, 'googlepage'])->name('google.login');
         Route::get('auth/google/callback', [GoogleController::class, 'googlepagecallback'])->name('google.callback');
-        Route::get('auth/google/check', [GoogleController::class, 'googlepagecheck']);
 
+        // ✅ أضف ده عشان Google Console فيه /en/
+        Route::get('en/auth/google/callback', [GoogleController::class, 'googlepagecallback']);
 
 
 
