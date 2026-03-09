@@ -24,8 +24,9 @@ class Otp
     $user = Auth::user();
 
     if (Auth::check() && $user->code) {
-        if (!$request->is('OTP*')) {
-            return redirect()->route('OTP.index');
+        $type = strtolower(\Illuminate\Support\Str::plural(class_basename($user)));
+        if (!$request->is('otp*') && !$request->is('*/otp*')) {
+            return redirect()->route('otp.index', ['type' => $type, 'id' => $user->id]);
         }
     }
 
