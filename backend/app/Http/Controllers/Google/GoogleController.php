@@ -21,52 +21,33 @@ class GoogleController extends Controller
     }
 
     public function googlepagecallback()
-{
-    try {
-        DB::beginTransaction();
+    {
+        $frontendUrl = env('FRONTEND_URL', 'http://localhost:3000');
 
-        $googleUser = Socialite::driver('google')->stateless()->user();
+        try {
+            DB::beginTransaction();
 
-        $finduser = User::where('email', $googleUser->email)->first();
+            $googleUser = Socialite::driver('google')->stateless()->user();
+            $finduser = User::where('email', $googleUser->email)->first();
 
-        // 1) لو الإيميل مش موجود → اعمله Create + Login + OTP
-        if (!$finduser) {
-            $authUser = User::create([
-                'name' => $googleUser->name,
-                'email' => $googleUser->email,
-                'password' => Hash::make(Str::random(16)),
-            ]);
+            if (!$finduser) {
+                $finduser = User::create([
+                    'name'     => $googleUser->name,
+                    'email'    => $googleUser->email,
+                    'password' => Hash::make(Str::random(16)),
+                    'qr_code'  => Str::random(64),
+                ]);
+            }
 
-            Auth::login($authUser);
-
-            $authUser->generate_code();
-            $authUser->notify(new Otp());
-
-            DB::commit();
-            return redirect()->route('OTP.index');
-        }
-
-        // 2) لو موجود + كان مسجل بجوجل قبل كده (password null)
-        if ($finduser) {
-            $authUser = $finduser;
-
-            Auth::login($authUser);
-
-            $authUser->generate_code();
-            $authUser->notify(new Otp());
+            // ✅ مش بنعمل OTP مع Google - بنعمل JWT مباشرة
+            $token = Auth::guard('api')->login($finduser);
 
             DB::commit();
-            return redirect()->route('OTP.index');
+
+            return redirect($frontendUrl . '/login?token=' . $token . '&type=users');
+        } catch (Exception $e) {
+            DB::rollBack();
+            return redirect($frontendUrl . '/login?error=google_auth_failed');
         }
-
-        // 3) لو عنده باسورد → لازم يدخل بحسابه العادي
-        toastr()->error('Try Normal Login, This account registered before by password.');
-        return redirect()->route('login');
-
-    } catch (Exception $e) {
-        DB::rollBack();
-        dd($e->getMessage());
     }
-}
-
 }
