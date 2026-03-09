@@ -7,6 +7,7 @@ use App\Models\DoctorReport;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class DoctorController extends Controller
 {
@@ -45,7 +46,6 @@ class DoctorController extends Controller
                 'total_patients' => $totalPatients,
             ],
         ]);
-
     }
     // -------------------------------------------------------
     // GET /api/doctor/patients
@@ -56,8 +56,8 @@ class DoctorController extends Controller
         $doctor = Auth::guard('doctor')->user();
 
         $patients = User::whereHas('doctorReports', function ($query) use ($doctor) {
-                $query->where('doctor_id', $doctor->id);
-            })
+            $query->where('doctor_id', $doctor->id);
+        })
             ->with(['profile', 'doctorReports' => function ($query) use ($doctor) {
                 $query->where('doctor_id', $doctor->id)->latest();
             }])
@@ -77,12 +77,32 @@ class DoctorController extends Controller
         return response()->json([
             'patients' => $patients,
         ]);
-
     }
+
+    // -------------------------------------------------------
+    // GET /api/doctor/patients/{id}
+    // عرض بيانات مريض محدد (للدكتور اللي اتعامل معاه)
+    // -------------------------------------------------------
+    public function showPatient($id)
+    {
+        $doctor = Auth::guard('doctor')->user();
+
+        // ✅ هنا ممكن نسمح للدكتور يشوف أي مريض أو مريضه هو بس
+        // يفضل نسمح لو المريض ده Searchable أو فيه تعامل مسبق
+        $patient = User::with(['profile.images', 'doctorReports.doctor'])->find($id);
+
+        if (!$patient) {
+            return response()->json(['error' => 'المريض غير موجود'], 404);
+        }
+
+        return response()->json(['patient' => $this->formatPatient($patient)]);
+    }
+
     // -------------------------------------------------------
     // GET /api/doctor/patients/search?national_id=xxx
     // بحث عن مريض بالرقم القومي
     // -------------------------------------------------------
+    // ✅ الطريقة الصح
     public function searchPatient(Request $request)
     {
         $request->validate([
