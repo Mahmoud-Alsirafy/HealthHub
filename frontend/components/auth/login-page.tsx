@@ -13,6 +13,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { MedLinkLogo } from "@/components/medlink-logo"
 import { Suspense, useRef } from "react"
 import { loginApi, registerApi, verifyOtpApi, resendOtpApi } from "@/lib/api"
+<<<<<<< HEAD
+=======
+import dynamic from "next/dynamic"
+import { toast } from "sonner"
+>>>>>>> origin/master
 
 import dynamic from "next/dynamic"
 import { toast } from "sonner"
@@ -242,7 +247,15 @@ function LoginForm() {
     });
   };
 
+<<<<<<< HEAD
 
+=======
+<<<<<<< HEAD
+<<<<<<< HEAD
+
+  // ✅ Check for token in URL (Google Auth Callback)
+=======
+>>>>>>> 1db8d6377603a1bc2113904025ff6d0acbfb3fec
   // ✅ Google Auth Handler - forceType للـ Register عشان دايمًا users
   const handleGoogleLogin = (forceType?: string) => {
     const type = forceType || role;
@@ -254,7 +267,11 @@ function LoginForm() {
   };
 
   // ✅ Check for token/otp in URL (Google Auth Callback)
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/master
+>>>>>>> 1db8d6377603a1bc2113904025ff6d0acbfb3fec
   useEffect(() => {
     const token = searchParams.get("token");
     const type = searchParams.get("type");
@@ -275,13 +292,73 @@ function LoginForm() {
     }
   }, [searchParams, router]);
 
+<<<<<<< HEAD
 //  parent of cb2e403 (Merge branch 'master')
+=======
+<<<<<<< HEAD
+
+=======
+>>>>>>> parent of cb2e403 (Merge branch 'master')
+>>>>>>> 1db8d6377603a1bc2113904025ff6d0acbfb3fec
   // ✅ Google Login (Redirect to API)
   const handleGoogleLogin = () => {
     // In a real implementation, this would redirect to the Laravel Socialite route
     // window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/auth/google/redirect`;
     alert("Google login setup required in backend (Socialite).");
   };
+=======
+  // ✅ Initialize QR Scanner
+  useEffect(() => {
+    let isMounted = true;
+    let html5QrCode: any = null;
+
+    if (view === "qr-scanner") {
+      const timer = setTimeout(async () => {
+        if (!isMounted) return;
+
+        const container = document.getElementById("qr-reader");
+        if (!container) return;
+
+        try {
+          const { Html5Qrcode } = await import("html5-qrcode");
+
+          if (!isMounted) return;
+
+          html5QrCode = new Html5Qrcode("qr-reader");
+          qrReaderRef.current = html5QrCode;
+
+          const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+
+          await html5QrCode.start(
+            { facingMode: "user" },
+            config,
+            (decodedText: string) => {
+              if (html5QrCode) {
+                html5QrCode.stop().then(() => {
+                  handleQrLogin(decodedText);
+                }).catch((err: any) => console.error("Failed to stop", err));
+              }
+            },
+            (_errorMessage: string) => {
+              // ignore scan errors
+            }
+          );
+        } catch (err) {
+          console.error("Unable to start scanning.", err);
+          setError("Unable to access camera. Please check permissions.");
+        }
+      }, 500);
+
+      return () => {
+        isMounted = false;
+        clearTimeout(timer);
+        if (html5QrCode && html5QrCode.isScanning) {
+          html5QrCode.stop().catch((e: any) => console.error("Stop failed", e));
+        }
+      };
+    }
+  }, [view]);
+>>>>>>> origin/master
 
   // ✅ Initialize QR Scanner
   useEffect(() => {
@@ -654,6 +731,15 @@ function LoginForm() {
                       {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                       Create Account
                     </Button>
+<<<<<<< HEAD
+=======
+
+<<<<<<< HEAD
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/master
+>>>>>>> 1db8d6377603a1bc2113904025ff6d0acbfb3fec
                     <div className="relative my-4">
                       <div className="absolute inset-0 flex items-center">
                         <span className="w-full border-t border-border" />
@@ -673,6 +759,16 @@ function LoginForm() {
                       </svg>
                       Register with Google
                     </Button>
+<<<<<<< HEAD
+=======
+
+<<<<<<< HEAD
+
+=======
+>>>>>>> parent of cb2e403 (Merge branch 'master')
+=======
+>>>>>>> origin/master
+>>>>>>> 1db8d6377603a1bc2113904025ff6d0acbfb3fec
                     <p className="text-center text-xs text-muted-foreground">
                       By registering, you agree to our Terms of Service and Privacy Policy
                     </p>
