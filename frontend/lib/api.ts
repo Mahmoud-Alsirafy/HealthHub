@@ -260,6 +260,29 @@ export async function storeReportApi(token: string, data: any) {
   });
   return response.json();
 }
+
+export async function getDoctorQrApi(token: string) {
+  const response = await fetch(`${API_BASE_URL}/doctor/qr`, {
+    method: "GET",
+    headers: {
+      "Accept": "application/json",
+      "Authorization": `Bearer ${token}`,
+    },
+  });
+  return response.json();
+}
+
+export async function regenerateDoctorQrApi(token: string) {
+  const response = await fetch(`${API_BASE_URL}/doctor/qr/regenerate`, {
+    method: "POST",
+    headers: {
+      "Accept": "application/json",
+      "Authorization": `Bearer ${token}`,
+    },
+  });
+  return response.json();
+}
+
 export const verifyPatientAccessApi = async (token: string, data: { patient_id: number, otp: string }) => {
   const res = await fetch(`${API_BASE_URL}/doctor/patients/verify-access`, {
     method: "POST",

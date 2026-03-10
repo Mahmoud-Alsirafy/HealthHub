@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\registerController;
 use App\Http\Controllers\Doctor\DoctorController;
+use App\Http\Controllers\Doctor\DoctorQrCodeController;
 use App\Http\Controllers\OtpController;
 use App\Http\Controllers\User\ProfileController;
 use App\Http\Controllers\User\QrCodeController;
@@ -72,6 +73,8 @@ Route::middleware('auth:doctor')->prefix('doctor')->group(function () {
     Route::post('/patients/verify-access', [DoctorController::class, 'verifyAccess']); // ✅ جديد
     Route::get('/patients/qr/{code}', [DoctorController::class, 'searchByQr']);
     Route::post('/reports', [DoctorController::class, 'storeReport']);
+    Route::get('/qr', [DoctorQrCodeController::class, 'show']);
+    Route::post('/qr/regenerate', [DoctorQrCodeController::class, 'regenerate']);
 });
 
 // -------------------------------------------------------
@@ -107,6 +110,7 @@ Route::middleware('auth:paramedic')->prefix('paramedic')->group(function () {
 // -------------------------------------------------------
 // Public
 Route::get('/qr/login/{code}', [QrCodeController::class, 'loginWithQr']);
+Route::get('/qr/doctor/login/{code}', [DoctorQrCodeController::class, 'loginWithQr']);
 // -------------------------------------------------------
 // Qr Routes (Protected)
 // -------------------------------------------------------

@@ -19,6 +19,7 @@ import {
   User as UserIcon,
   QrCode,
   X,
+  Download,
 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -34,6 +35,8 @@ import {
   searchPatientApi,
   searchByQrApi,
   storeReportApi,
+  getDoctorQrApi,
+  regenerateDoctorQrApi,
   API_BASE_URL,
 } from "@/lib/api"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -56,6 +59,7 @@ const navItems = [
   { title: "Search Patient", href: "/dashboard/doctor", icon: Search },
   { title: "My Patients", href: "/dashboard/doctor", icon: Users, badge: "4" },
   { title: "Add Diagnosis", href: "/dashboard/doctor", icon: Stethoscope },
+  { title: "QR Code", href: "/dashboard/doctor", icon: QrCode },
   { title: "Prescriptions", href: "/dashboard/doctor", icon: Pill },
   { title: "Lab Results", href: "/dashboard/doctor", icon: FlaskConical },
 ]
@@ -84,6 +88,10 @@ export function DoctorDashboardContent() {
   const [requiredTests, setRequiredTests] = useState("")
   const [nextVisit, setNextVisit] = useState("")
 
+  // QR Code (generate / regenerate like patient dashboard)
+  const [qrImage, setQrImage] = useState<string | null>(null)
+  const [qrLoading, setQrLoading] = useState(false)
+
   const token = typeof window !== 'undefined' ? localStorage.getItem("auth_token") : null
 
   useEffect(() => {
@@ -101,12 +109,29 @@ export function DoctorDashboardContent() {
         if (patientsRes.patients) {
           setPatients(patientsRes.patients)
         }
+
+        const qrRes = await getDoctorQrApi(token)
+        if (qrRes.qr_image) setQrImage(qrRes.qr_image)
       } catch (err) {
         console.error("Failed to fetch dashboard data", err)
         toast.error("Failed to load dashboard data")
       }
     })
   }, [token])
+
+  const handleRegenerateDoctorQr = () => {
+    if (!token) return
+    setQrLoading(true)
+    regenerateDoctorQrApi(token)
+      .then((res) => {
+        if (res.qr_image) {
+          setQrImage(res.qr_image)
+          toast.success(res.message || "New QR code generated and sent to your email.")
+        } else toast.error(res.error || "Failed to regenerate QR code")
+      })
+      .catch(() => toast.error("Failed to regenerate QR code"))
+      .finally(() => setQrLoading(false))
+  }
 
   // ✅ QR Scanner useEffect - نفس الـ pattern المصلح
   useEffect(() => {
@@ -375,10 +400,11 @@ export function DoctorDashboardContent() {
 
         {/* Main Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 lg:w-fit h-auto">
+          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 lg:w-fit h-auto">
             <TabsTrigger value="patients">My Patients</TabsTrigger>
             <TabsTrigger value="search">Search Patient</TabsTrigger>
             <TabsTrigger value="diagnosis">Add Diagnosis & Records</TabsTrigger>
+            <TabsTrigger value="qr">QR Code</TabsTrigger>
           </TabsList>
 
           {/* Patients Tab */}
@@ -852,6 +878,49 @@ export function DoctorDashboardContent() {
                 </div>
               </div>
             )}
+          </TabsContent>
+
+          {/* QR Code tab - generate / regenerate like patient dashboard */}
+          <TabsContent value="qr" className="mt-4 text-center">
+            <Card className="max-w-2xl mx-auto">
+              <CardContent className="py-12">
+                <div className="inline-block p-10 bg-white dark:bg-muted rounded-3xl border-2 border-dashed border-primary/20 mb-8 overflow-hidden shadow-inner">
+                  {qrImage ? (
+                    <img src={qrImage} alt="Doctor QR Code" className="h-48 w-48 object-contain" />
+                  ) : (
+                    <div className="h-48 w-48 flex items-center justify-center">
+                      <QrCode className="h-20 w-20 text-foreground opacity-10 animate-pulse" />
+                    </div>
+                  )}
+                </div>
+                <h3 className="text-2xl font-bold mb-2">Doctor QR Code</h3>
+                <p className="text-muted-foreground max-w-md mx-auto mb-8">
+                  Your personal QR code for quick login. Scan to sign in on another device or share your profile.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <Button className="rounded-xl px-8" onClick={handleRegenerateDoctorQr} disabled={qrLoading}>
+                    <Plus className="mr-2 h-4 w-4" />
+                    {qrLoading ? "Generating..." : "Regenerate QR"}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="rounded-xl px-8"
+                    disabled={!qrImage}
+                    onClick={() => {
+                      if (!qrImage) return
+                      const link = document.createElement("a")
+                      link.href = qrImage
+                      link.download = `QR_Code_Doctor_${profile?.name?.replace(/\s/g, "_")}.png`
+                      document.body.appendChild(link)
+                      link.click()
+                      document.body.removeChild(link)
+                    }}
+                  >
+                    <Download className="mr-2 h-4 w-4" /> Download QR
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </div>

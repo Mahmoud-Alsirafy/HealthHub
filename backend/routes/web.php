@@ -2,36 +2,7 @@
 
 use App\Http\Controllers\Image\ImageController;
 use App\Http\Controllers\Google\GoogleController;
-
-use App\Models\User;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
-
-// -----------------------------------------------------------------------------
-// Public
-// -----------------------------------------------------------------------------
-
-
-
-// Route::group(['namespace' => 'Auth'], function () {
-//     Route::get('/', [HomeController::class, 'index'])->name('selection');
-//     Route::get('/login/{type}', [LoginController::class, 'loginFom'])->middleware('guest')->name('login.show');
-//     Route::post('/login', [LoginController::class, 'login'])->name('login');
-//     Route::get('/login', function () {
-//         return redirect()->route('selection');
-//     })->name('login');
-//     Route::post('/logout/{type}', [LoginController::class, 'logout'])->name('logout');
-// });
-
-
-// -----------------------------------------------------------------------------
-// Dashboard routes (post-login redirect targets) — each protected by its guard
-// -----------------------------------------------------------------------------
-
-Route::get('/user', function () {
-    $users = User::find(Auth::guard('web')->user()->id)->get();
-    return response()->json(['users' => $users]);
-})->middleware('auth:web')->name('user.dashboard');
 
 
 
