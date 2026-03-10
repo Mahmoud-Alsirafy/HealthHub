@@ -102,13 +102,21 @@ export function DashboardShell({ children, navItems, userName, userRole, userIni
                         </Link>
                       )
                       : (
+<<<<<<< HEAD
+                        <div className="flex w-full items-center gap-2">
+=======
                         <div type="button" className="flex w-full items-center gap-2">
+>>>>>>> main
                           <item.icon className="h-4 w-4" />
                           <span>{item.title}</span>
                           {item.badge && (
                             <Badge variant="secondary" className="ml-auto text-xs">{item.badge}</Badge>
                           )}
+<<<<<<< HEAD
+                        </div>
+=======
                         </ div>
+>>>>>>> main
                         )}
                     </SidebarMenuButton>
                   </SidebarMenuItem>
