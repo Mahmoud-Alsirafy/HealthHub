@@ -116,6 +116,6 @@ Route::get('/qr/doctor/login/{code}', [DoctorQrCodeController::class, 'loginWith
 // -------------------------------------------------------
 // Protected
 Route::middleware('auth:api')->prefix('user')->group(function () {
-    Route::get('/qr', [QrCodeController::class, 'generateQrBase64']);
+    Route::get('/qr', [QrCodeController::class, 'show']);
     Route::post('/qr/regenerate', [QrCodeController::class, 'regenerate']);
 });

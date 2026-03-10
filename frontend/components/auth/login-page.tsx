@@ -227,19 +227,36 @@ function LoginForm() {
     });
   };
 
-  // ✅ QR Login Handler
-  const handleQrLogin = async (code: string) => {
+  // ✅ QR Login Handler – scanner may return full URL or raw code; support user & doctor endpoints
+  const handleQrLogin = async (decodedText: string) => {
     setError(null);
+    const base = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api";
+    const trimmed = decodedText.trim();
+    const isDoctorQr = trimmed.includes("/qr/doctor/login");
+    const isUserQr = trimmed.includes("/qr/login");
+    let code = trimmed;
+    if (isDoctorQr || isUserQr) {
+      try {
+        const url = new URL(trimmed.startsWith("http") ? trimmed : "http://dummy/" + trimmed);
+        code = url.pathname.split("/").filter(Boolean).pop() || trimmed;
+      } catch {
+        code = trimmed.split("/").filter(Boolean).pop() || trimmed;
+      }
+    }
+    const endpoint = isDoctorQr ? `${base}/qr/doctor/login/${encodeURIComponent(code)}` : `${base}/qr/login/${encodeURIComponent(code)}`;
+
     startTransition(async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api"}/qr/login/${code}`);
-        const res = await response.json();
+        const response = await fetch(endpoint);
+        const contentType = response.headers.get("content-type");
+        const isJson = contentType?.includes("application/json");
+        const res = isJson ? await response.json() : { error: "Server error. Please try again." };
 
         if (res.token) {
           localStorage.setItem("auth_token", res.token);
           localStorage.setItem("auth_type", res.type || "users");
 
-          if (res.type === "doctors") {
+          if (res.type === "doctors" || res.type === "doctor") {
             router.push("/dashboard/doctor");
           } else if (res.type === "pharmas" || res.type === "laps" || res.type === "paramedics") {
             router.push("/dashboard/facility");
