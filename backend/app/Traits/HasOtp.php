@@ -4,7 +4,8 @@ namespace App\Traits;
 
 trait HasOtp
 {
-    public function generateCode()
+    // ✅ generate_code بدل generateCode
+    public function generate_code()
     {
         $this->timestamps = false;
         $this->code = random_int(100000, 999999);
@@ -12,13 +13,12 @@ trait HasOtp
         $this->save();
     }
 
-    public function resetCode()
+    // ✅ reset_code بدل resetCode
+    public function reset_code()
     {
         $this->timestamps = false;
-
         $this->code = null;
         $this->expired_at = null;
-
         $this->save();
     }
 }
