@@ -67,11 +67,9 @@ Route::middleware('auth:doctor')->prefix('doctor')->group(function () {
     Route::get('/patients', [DoctorController::class, 'myPatients']);
     Route::get('/patients/{id}', [DoctorController::class, 'showPatient']);
 
-    // ✅ بحث
     Route::post('/patients/search', [DoctorController::class, 'searchPatient']);
+    Route::post('/patients/verify-access', [DoctorController::class, 'verifyAccess']); // ✅ جديد
     Route::get('/patients/qr/{code}', [DoctorController::class, 'searchByQr']);
-
-    // ✅ إضافة تقرير
     Route::post('/reports', [DoctorController::class, 'storeReport']);
 });
 

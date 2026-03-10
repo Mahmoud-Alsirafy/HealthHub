@@ -8,7 +8,7 @@ trait HasOtp
     {
         $this->timestamps = false;
         $this->code = rand(100000, 999999);
-        $this->expierd_at = now()->addMinute(15);
+        $this->expired_at = now()->addMinute(15);
         $this->save();
     }
 
@@ -16,7 +16,7 @@ trait HasOtp
     {
         $this->timestamps = false;
         $this->code = null;
-        $this->expierd_at = null;
+        $this->expired_at = null;
         $this->save();
     }
 }

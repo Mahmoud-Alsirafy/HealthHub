@@ -47,8 +47,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { toast } from "sonner"
+import { InputOTP, InputOTPGroup, InputOTPSlot, InputOTPSeparator } from "@/components/ui/input-otp"
+import { verifyPatientAccessApi } from "@/lib/api"
 
 const navItems = [
   { title: "Overview", href: "/dashboard/doctor", icon: LayoutDashboard },
@@ -66,6 +67,8 @@ export function DoctorDashboardContent() {
   const [patients, setPatients] = useState<any[]>([])
   const [searchQuery, setSearchQuery] = useState("")
   const [searchResults, setSearchResults] = useState<any[]>([])
+  const [pendingPatient, setPendingPatient] = useState<{ id: number; name: string } | null>(null)
+  const [otpCode, setOtpCode] = useState("")
   const [selectedPatient, setSelectedPatient] = useState<any>(null)
   const [activeTab, setActiveTab] = useState("overview")
 
@@ -163,14 +166,55 @@ export function DoctorDashboardContent() {
     startTransition(async () => {
       try {
         const res = await searchPatientApi(token, searchQuery)
-        if (res.patient) {
+        // New flow: backend sends OTP to patient and returns basic info + patient_id
+        if (res.status === "pending" && res.patient_id) {
+          setPendingPatient({ id: res.patient_id, name: res.patient_name })
+          setOtpCode("")
+          setSearchResults([])
+          toast.message("OTP sent to patient", {
+            description: res.message || "Ask the patient for the 6‑digit code.",
+          })
+        } else if (res.patient) {
+          // Fallback if API ever returns full patient directly
           setSearchResults([res.patient])
+          setPendingPatient(null)
         } else {
           setSearchResults([])
-          toast.error("Patient not found")
+          setPendingPatient(null)
+          toast.error(res.error || "Patient not found")
         }
       } catch (err) {
         toast.error("Search failed")
+      }
+    })
+  }
+
+  const handleVerifyOtp = () => {
+    if (!token || !pendingPatient) return
+    if (!otpCode || otpCode.length !== 6) {
+      toast.error("Please enter the 6‑digit OTP code")
+      return
+    }
+
+    startTransition(async () => {
+      try {
+        const res = await verifyPatientAccessApi(token, {
+          patient_id: pendingPatient.id,
+          otp: otpCode,
+        })
+
+        if (res.patient) {
+          setSelectedPatient(res.patient)
+          setReportPatientId(String(res.patient.id))
+          setActiveTab("diagnosis")
+          setPendingPatient(null)
+          setOtpCode("")
+          toast.success(`Access granted to ${res.patient.name}`)
+        } else {
+          toast.error(res.error || "Invalid OTP code")
+        }
+      } catch (err) {
+        toast.error("Failed to verify OTP")
       }
     })
   }
@@ -467,6 +511,53 @@ export function DoctorDashboardContent() {
                     )}
                   </div>
                 </div>
+
+                {/* OTP Verification Step for National ID search */}
+                {pendingPatient && (
+                  <div className="mt-2 rounded-2xl border border-primary/20 bg-primary/5 p-5 space-y-4">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <p className="text-xs font-bold uppercase text-primary/80">Access Verification</p>
+                        <p className="text-sm font-semibold text-foreground">
+                          Patient: <span className="font-bold">{pendingPatient.name}</span>
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          An OTP code was sent to the patient's email / phone. Ask them to read it to you and enter it here.
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex flex-col md:flex-row md:items-center gap-4">
+                      <InputOTP
+                        maxLength={6}
+                        value={otpCode}
+                        onChange={(value) => setOtpCode(value)}
+                        containerClassName="w-full justify-center md:justify-start"
+                      >
+                        <InputOTPGroup>
+                          <InputOTPSlot index={0} />
+                          <InputOTPSlot index={1} />
+                          <InputOTPSlot index={2} />
+                          <InputOTPSeparator />
+                          <InputOTPSlot index={3} />
+                          <InputOTPSlot index={4} />
+                          <InputOTPSlot index={5} />
+                        </InputOTPGroup>
+                      </InputOTP>
+                      <Button
+                        className="h-11 rounded-xl px-6 font-bold"
+                        disabled={isPending || otpCode.length !== 6}
+                        onClick={handleVerifyOtp}
+                      >
+                        {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ChevronRight className="mr-2 h-4 w-4" />}
+                        Verify & Open Records
+                      </Button>
+                    </div>
+                    <p className="text-[11px] text-primary/70">
+                      For security, this code expires after a short time. If it fails, search again to send a new OTP.
+                    </p>
+                  </div>
+                )
+                }
 
                 {/* Search Results */}
                 {searchResults.length > 0 && (

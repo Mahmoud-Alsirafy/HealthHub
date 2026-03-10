@@ -249,3 +249,14 @@ export async function storeReportApi(token: string, data: any) {
   });
   return response.json();
 }
+export const verifyPatientAccessApi = async (token: string, data: { patient_id: number, otp: string }) => {
+  const res = await fetch(`${API_BASE_URL}/doctor/patients/verify-access`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+  return res.json();
+};

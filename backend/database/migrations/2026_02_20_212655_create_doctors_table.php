@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->string('password');
             $table->string('code')->nullable();
-            $table->datetime('expierd_at')->nullable();
+            $table->datetime('expired_at')->nullable();
             $table->string('qr_code', 64)->nullable()->unique();
 
             // بيانات شخصية

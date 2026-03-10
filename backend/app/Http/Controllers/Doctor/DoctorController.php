@@ -105,20 +105,55 @@ class DoctorController extends Controller
     // ✅ الطريقة الصح
     public function searchPatient(Request $request)
     {
-        $request->validate([
-            'national_id' => 'required|string',
-        ]);
+        $request->validate(['national_id' => 'required|string']);
 
-        $patient = User::where('national_id', $request->national_id)
-            ->with(['profile.images', 'doctorReports.doctor'])
-            ->first();
+        $doctor = Auth::guard('doctor')->user();
+
+        $patient = User::where('national_id', $request->national_id)->first();
 
         if (!$patient) {
             return response()->json(['error' => 'المريض غير موجود'], 404);
         }
 
-        return response()->json(['patient' => $this->formatPatient($patient)]);
+        // ✅ ولد OTP وابعته للمريض
+        $patient->generate_code();
+        $patient->notify(new \App\Notifications\DoctorAccessRequest($doctor, $patient->code));
+
+        return response()->json([
+            'status'     => 'pending',
+            'patient_id' => $patient->id,
+            'patient_name' => $patient->name, // اسم بس - مش بيانات كاملة
+            'message'    => 'OTP sent to patient. Ask them for the code.',
+        ]);
     }
+
+    public function verifyAccess(Request $request)
+{
+    $request->validate([
+        'patient_id' => 'required|exists:users,id',
+        'otp'        => 'required|string|size:6',
+    ]);
+
+    $patient = User::where('id', $request->patient_id)
+                   ->where('code', $request->otp)
+                   ->first();
+
+    // ✅ تحقق من الـ OTP والـ expiry
+    if (!$patient) {
+        return response()->json(['error' => 'Invalid OTP code'], 422);
+    }
+
+    if ($patient->expired_at < now()) {
+        return response()->json(['error' => 'OTP expired. Please search again.'], 422);
+    }
+
+    // ✅ امسح الـ OTP بعد الاستخدام
+    $patient->reset_code();
+
+    // ✅ رجّع البيانات الكاملة
+    $patient->load(['profile.images', 'doctorReports.doctor']);
+    return response()->json(['patient' => $this->formatPatient($patient)]);
+}
 
     // -------------------------------------------------------
     // GET /api/doctor/patients/qr/{code}
