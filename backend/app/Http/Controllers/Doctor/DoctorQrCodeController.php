@@ -124,7 +124,8 @@ class DoctorQrCodeController extends Controller
             $relativePath,
             $doctor->national_id ?? '',
             $doctor->name,
-            $doctor->qr_code
+            $doctor->qr_code,
+            'doctor'
         ));
     }
 }
