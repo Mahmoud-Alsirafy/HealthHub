@@ -4,6 +4,7 @@ namespace App\Http\Controllers\User;
 
 use App\Models\User;
 use App\Models\Image;
+use App\Models\DoctorReport;
 use App\Models\PatientProfile;
 use App\Traits\AttachFiles;
 use Illuminate\Http\Request;
@@ -178,6 +179,41 @@ class ProfileController extends Controller
 
         return response()->json([
             'message' => 'Account deleted successfully',
+        ]);
+    }
+
+    // -------------------------------------------------------
+    // عرض مواعيد المتابعة القادمة مع الأطباء (next_visit_date)
+    // -------------------------------------------------------
+    public function appointments()
+    {
+        $userId = Auth::guard('api')->id();
+
+        $appointments = DoctorReport::with('doctor')
+            ->where('user_id', $userId)
+            ->whereNotNull('next_visit_date')
+            ->orderBy('next_visit_date')
+            ->get()
+            ->map(function (DoctorReport $report) {
+                return [
+                    'id'              => $report->id,
+                    'doctor_id'       => $report->doctor_id,
+                    'user_id'         => $report->user_id,
+                    'doctor_name'     => $report->doctor?->name,
+                    'specialty'       => $report->doctor?->specialty,
+                    'facility'        => $report->doctor?->facility,
+                    'diagnosis'       => $report->diagnosis,
+                    'notes'           => $report->notes,
+                    'required_tests'  => $report->required_tests,
+                    'next_visit_date' => optional($report->next_visit_date)->toDateString(),
+                    'created_at'      => optional($report->created_at)->toDateTimeString(),
+                    'updated_at'      => optional($report->updated_at)->toDateTimeString(),
+                ];
+            })
+            ->values();
+
+        return response()->json([
+            'appointments' => $appointments,
         ]);
     }
 }

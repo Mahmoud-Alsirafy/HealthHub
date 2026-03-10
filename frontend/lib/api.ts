@@ -176,6 +176,17 @@ export async function regenerateQrApi(token: string) {
   return response.json();
 }
 
+export async function getAppointmentsApi(token: string) {
+  const response = await fetch(`${API_BASE_URL}/user/appointments`, {
+    method: "GET",
+    headers: {
+      "Accept": "application/json",
+      "Authorization": `Bearer ${token}`,
+    },
+  });
+  return response.json();
+}
+
 // -------------------------------------------------------
 // Doctor Dashboard APIs
 // -------------------------------------------------------

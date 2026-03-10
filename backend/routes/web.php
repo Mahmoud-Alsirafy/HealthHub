@@ -53,18 +53,6 @@ Route::get('/paramedics', function () {
     return response()->json(['message' => 'Paramedics Dashboard']);
 })->middleware('auth:paramedic')->name('paramedics.dashboard');
 
-// -----------------------------------------------------------------------------
-// Auth
-// -----------------------------------------------------------------------------
-
-
-
-
-
-
-
-Route::post('reg_form', [\App\Http\Controllers\Auth\registerController::class, 'reg_form'])->name('reg_form');
-Route::post('register', [\App\Http\Controllers\Auth\registerController::class, 'register'])->name('register');
 
 // -----------------------------------------------------------------------------
 // Commented / Localization (for reference)
