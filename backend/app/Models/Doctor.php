@@ -18,7 +18,7 @@ class Doctor extends Authenticatable implements JWTSubject
         'email',
         'password',
         'code',
-        'expierd_at',
+        'expired_at',
         'qr_code',
         'phone',
         'national_id',
@@ -35,7 +35,7 @@ class Doctor extends Authenticatable implements JWTSubject
         'password',
         'remember_token',
         'code',
-        'expierd_at',
+        'expired_at',
     ];
 
     protected $visible = [
@@ -58,7 +58,7 @@ class Doctor extends Authenticatable implements JWTSubject
     {
         return [
             'password'   => 'hashed',
-            'expierd_at' => 'datetime',
+            'expired_at' => 'datetime',
             'birth_date' => 'date',
         ];
     }

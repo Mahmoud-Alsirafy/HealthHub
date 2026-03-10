@@ -20,14 +20,14 @@ class User extends Authenticatable implements JWTSubject
         'national_id',
         'code',
         'qr_code',
-        'expierd_at',
+        'expired_at',
     ];
 
     protected $hidden = [
         'password',
         'remember_token',
         'code',
-        'expierd_at',
+        'expired_at',
     ];
 
     protected $visible = [
@@ -43,7 +43,7 @@ class User extends Authenticatable implements JWTSubject
         return [
             'email_verified_at' => 'datetime',
             'password'          => 'hashed',
-            'expierd_at'        => 'datetime',
+            'expired_at'        => 'datetime',
         ];
     }
 

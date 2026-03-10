@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('national_id')->nullable();
             $table->string('code')->nullable();
             $table->string('qr_code', 64)->nullable()->unique();
-            $table->datetime('expierd_at')->nullable();
+            $table->datetime('expired_at')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

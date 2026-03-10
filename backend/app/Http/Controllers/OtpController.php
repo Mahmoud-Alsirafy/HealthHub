@@ -73,7 +73,7 @@ class OtpController extends Controller
         return response()->json(['error' => trans('auth.failed')], 404);
     }
 
-    if ($user->expierd_at && now()->greaterThan($user->expierd_at)) {
+    if ($user->expired_at && now()->greaterThan($user->expired_at)) {
         return response()->json(['error' => trans('auth.expierd')], 400);
     }
 
@@ -118,15 +118,15 @@ class OtpController extends Controller
         }
 
         // لو الكود لسه شغال بلاش نعيده
-        if ($user->expierd_at && now()->lessThan($user->expierd_at)) {
-            return response()->json(['message' => trans('auth.work'), 'expires_at' => $user->expierd_at], 200);
+        if ($user->expired_at && now()->lessThan($user->expired_at)) {
+            return response()->json(['message' => trans('auth.work'), 'expires_at' => $user->expired_at], 200);
         }
 
         // اعمل كود جديد
         $user->generate_code();
         $user->notify(new Otp());
 
-        return response()->json(['message' => trans('auth.resend'), 'expires_at' => $user->expierd_at], 200);
+        return response()->json(['message' => trans('auth.resend'), 'expires_at' => $user->expired_at], 200);
     }
 
 
