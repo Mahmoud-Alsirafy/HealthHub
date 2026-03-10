@@ -63,9 +63,11 @@ class QrCodeController extends Controller
     /**
      * Handle login via QR Code scan.
      * GET /api/qr/login/{code}
+     * Accepts raw code or full URL (scanner often returns full URL).
      */
     public function loginWithQr(string $code)
     {
+        $code = $this->normalizeQrCode($code);
         $user = User::where('qr_code', $code)->first();
 
         if (!$user) {
@@ -87,6 +89,18 @@ class QrCodeController extends Controller
                 'email' => $user->email,
             ],
         ]);
+    }
+
+    /**
+     * Extract actual QR token from raw code or full URL (scanner often returns full URL).
+     */
+    private function normalizeQrCode(string $code): string
+    {
+        $code = trim($code);
+        if (str_contains($code, '/qr/login/') || str_contains($code, '/qr/doctor/login/')) {
+            $code = basename(parse_url($code, PHP_URL_PATH) ?: $code);
+        }
+        return $code;
     }
 
     /**

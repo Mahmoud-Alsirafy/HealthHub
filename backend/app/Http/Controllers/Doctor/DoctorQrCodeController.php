@@ -62,9 +62,11 @@ class DoctorQrCodeController extends Controller
     /**
      * Handle doctor login via QR Code scan.
      * GET /api/qr/doctor/login/{code}
+     * Accepts raw code or full URL (scanner often returns full URL).
      */
     public function loginWithQr(string $code)
     {
+        $code = $this->normalizeQrCode($code);
         $doctor = Doctor::where('qr_code', $code)->first();
 
         if (!$doctor) {
@@ -76,7 +78,7 @@ class DoctorQrCodeController extends Controller
         return response()->json([
             'message' => 'Logged in successfully via QR',
             'token'   => $token,
-            'type'    => 'doctor',
+            'type'    => 'doctors',
             'user'    => [
                 'id'        => $doctor->id,
                 'name'      => $doctor->name,
@@ -84,6 +86,15 @@ class DoctorQrCodeController extends Controller
                 'specialty' => $doctor->specialty,
             ],
         ]);
+    }
+
+    private function normalizeQrCode(string $code): string
+    {
+        $code = trim($code);
+        if (str_contains($code, '/qr/login/') || str_contains($code, '/qr/doctor/login/')) {
+            $code = basename(parse_url($code, PHP_URL_PATH) ?: $code);
+        }
+        return $code;
     }
 
     protected function generateQrBase64(string $code): string
