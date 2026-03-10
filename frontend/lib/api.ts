@@ -175,3 +175,77 @@ export async function regenerateQrApi(token: string) {
   });
   return response.json();
 }
+
+// -------------------------------------------------------
+// Doctor Dashboard APIs
+// -------------------------------------------------------
+
+export async function getDoctorMeApi(token: string) {
+  const response = await fetch(`${API_BASE_URL}/doctor/me`, {
+    method: "GET",
+    headers: {
+      "Accept": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+  });
+  return response.json();
+}
+
+export async function getDoctorPatientsApi(token: string) {
+  const response = await fetch(`${API_BASE_URL}/doctor/patients`, {
+    method: "GET",
+    headers: {
+      "Accept": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+  });
+  return response.json();
+}
+
+export async function getPatientDetailsApi(token: string, id: string | number) {
+  const response = await fetch(`${API_BASE_URL}/doctor/patients/${id}`, {
+    method: "GET",
+    headers: {
+      "Accept": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+  });
+  return response.json();
+}
+
+export async function searchPatientApi(token: string, nationalId: string) {
+  const response = await fetch(`${API_BASE_URL}/doctor/patients/search`, {
+    method: "POST",
+    headers: {
+      "Accept": "application/json",
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+    body: JSON.stringify({ national_id: nationalId }),
+  });
+  return response.json();
+}
+
+export async function searchByQrApi(token: string, code: string) {
+  const response = await fetch(`${API_BASE_URL}/doctor/patients/qr/${code}`, {
+    method: "GET",
+    headers: {
+      "Accept": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+  });
+  return response.json();
+}
+
+export async function storeReportApi(token: string, data: any) {
+  const response = await fetch(`${API_BASE_URL}/doctor/reports`, {
+    method: "POST",
+    headers: {
+      "Accept": "application/json",
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+    body: JSON.stringify(data),
+  });
+  return response.json();
+}

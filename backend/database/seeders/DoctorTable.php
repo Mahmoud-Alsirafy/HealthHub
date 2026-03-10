@@ -16,8 +16,26 @@ class DoctorTable extends Seeder
     {
         DB::table('doctors')->delete();
         Doctor::create([
-            'name'     => 'Dr. Sarah El-Sayed',
+            'name'     => 'Dr. wael El-Sayed',
             'email'    => 'wael@gmail.com',
+            'password' => bcrypt('123'),
+            'specialty' => 'Cardiologist',
+            'facility'  => 'Cairo University Hospital',
+            'department' => 'Cardiology',
+            'experience_years' => 10,
+        ]);
+        Doctor::create([
+            'name'     => 'Dr. zeyad El-Sayed',
+            'email'    => 'zeyad@gmail.com',
+            'password' => bcrypt('123'),
+            'specialty' => 'Cardiologist',
+            'facility'  => 'Cairo University Hospital',
+            'department' => 'Cardiology',
+            'experience_years' => 10,
+        ]);
+        Doctor::create([
+            'name'     => 'Dr. Sarah El-Sayed',
+            'email'    => 'Sarah@gmail.com',
             'password' => bcrypt('123'),
             'specialty' => 'Cardiologist',
             'facility'  => 'Cairo University Hospital',

@@ -66,9 +66,6 @@ Route::get('/paramedics', function () {
 Route::post('reg_form', [\App\Http\Controllers\Auth\registerController::class, 'reg_form'])->name('reg_form');
 Route::post('register', [\App\Http\Controllers\Auth\registerController::class, 'register'])->name('register');
 
-// Google Auth
-// (Moved into localized group below)
-
 // -----------------------------------------------------------------------------
 // Commented / Localization (for reference)
 // -----------------------------------------------------------------------------
@@ -90,13 +87,9 @@ Route::group(
 
 
         // Google Auth
-        Route::get('auth/google', [GoogleController::class, 'googlepage'])->name('google.login');
-        Route::get('auth/google/callback', [GoogleController::class, 'googlepagecallback'])->name('google.callback');
-
-        // ✅ أضف ده عشان Google Console فيه /en/
-        Route::get('en/auth/google/callback', [GoogleController::class, 'googlepagecallback']);
-
-
+        Route::get('auth/google', [GoogleController::class, 'googlepage']);
+        Route::get('auth/google/callback', [GoogleController::class, 'googlepagecallback']);
+        Route::get('auth/google/check', [GoogleController::class, 'googlepagecheck']);
 
         // Image (extract text from image)
         Route::prefix('image')->group(function () {

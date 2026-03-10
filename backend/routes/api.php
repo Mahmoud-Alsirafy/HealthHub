@@ -65,6 +65,7 @@ Route::middleware('auth:doctor')->prefix('doctor')->group(function () {
     Route::post('/logout', [LoginController::class, 'logout'])->name('api.doctor.logout');
     Route::get('/me', [DoctorController::class, 'me'])->name('api.doctor.me');
     Route::get('/patients', [DoctorController::class, 'myPatients']);
+    Route::get('/patients/{id}', [DoctorController::class, 'showPatient']);
 
     // ✅ بحث
     Route::post('/patients/search', [DoctorController::class, 'searchPatient']);
