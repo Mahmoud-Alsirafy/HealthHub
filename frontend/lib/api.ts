@@ -237,7 +237,10 @@ export async function searchPatientApi(token: string, nationalId: string) {
   return response.json();
 }
 
-export async function searchByQrApi(token: string, code: string) {
+export async function searchByQrApi(token: string, qrValue: string) {
+
+  const code = qrValue.split('/').pop(); // استخراج الكود من الرابط
+
   const response = await fetch(`${API_BASE_URL}/doctor/patients/qr/${code}`, {
     method: "GET",
     headers: {
@@ -245,6 +248,7 @@ export async function searchByQrApi(token: string, code: string) {
       "Authorization": `Bearer ${token}`
     },
   });
+
   return response.json();
 }
 

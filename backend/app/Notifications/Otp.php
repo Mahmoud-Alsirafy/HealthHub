@@ -11,45 +11,21 @@ class Otp extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    /**
-     * Create a new notification instance.
-     */
-    public function __construct()
-    {
-        //
-    }
-
-    /**
-     * Get the notification's delivery channels.
-     *
-     * @return array<int, string>
-     */
     public function via(object $notifiable): array
     {
         return ['mail'];
     }
 
-    /**
-     * Get the mail representation of the notification.
-     */
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject("OTP For Tow Auth")
-            ->line('Your OTP Code ' . $notifiable->code . ' Keep Is Safe')
-            ->action('Login', url('OTP'))
-            ->line('Thank you for using our application!');
-    }
-
-    /**
-     * Get the array representation of the notification.
-     *
-     * @return array<string, mixed>
-     */
-    public function toArray(object $notifiable): array
-    {
-        return [
-            //
-        ];
+            ->subject('Your Verification Code - MedLink')
+            ->greeting("Hello {$notifiable->name},")
+            ->line("To continue with your authentication, please use the following One-Time Password (OTP):")
+            ->line("**{$notifiable->code}**")
+            ->line("This code is valid for **15 minutes**.")
+            ->line("For your security, please do not share this code with anyone.")
+            ->line("If you did not attempt to sign in, please ignore this message.")
+            ->salutation("MedLink Security Team");
     }
 }
