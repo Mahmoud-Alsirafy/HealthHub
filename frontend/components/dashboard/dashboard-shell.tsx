@@ -108,6 +108,7 @@ export function DashboardShell({ children, navItems, userName, userRole, userIni
                           {item.badge && (
                             <Badge variant="secondary" className="ml-auto text-xs">{item.badge}</Badge>
                           )}
+
                         </div>
                         )}
                     </SidebarMenuButton>
