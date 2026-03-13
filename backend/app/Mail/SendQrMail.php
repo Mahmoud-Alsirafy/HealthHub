@@ -15,7 +15,6 @@ class SendQrMail extends Mailable
     public $nationality_id;
     public $user;
     public $encryptedData;
-    /** @var string|null 'patient' | 'doctor' - for subject and view */
     public $recipientType;
 
     public function __construct($filePath, $nationality_id, $user, $encryptedData = null, $recipientType = 'patient')
@@ -30,8 +29,8 @@ class SendQrMail extends Mailable
     public function build()
     {
         $subject = $this->recipientType === 'doctor'
-            ? 'QR Code للطبيب / Doctor QR Code'
-            : 'QR Code للمريض';
+            ? 'Your Doctor QR Code - HealthHub'
+            : 'Your Patient QR Code - HealthHub';
 
         $mailable = $this->subject($subject)
             ->view('pages.QR_Code.Show')
@@ -41,10 +40,14 @@ class SendQrMail extends Mailable
                 'encryptedData' => $this->encryptedData,
             ]);
 
-        // Attach only if file exists (avoids failure when path is wrong or file missing)
+        // Attach QR file if exists
         $fullPath = Storage::disk('local')->path($this->filePath);
+
         if ($fullPath && file_exists($fullPath)) {
-            $mailable->attach($fullPath, ['as' => 'qr_code.png', 'mime' => 'image/png']);
+            $mailable->attach($fullPath, [
+                'as' => 'healthhub-qr-code.png',
+                'mime' => 'image/png'
+            ]);
         }
 
         return $mailable;

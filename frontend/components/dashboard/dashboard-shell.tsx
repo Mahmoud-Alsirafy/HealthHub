@@ -110,7 +110,7 @@ export function DashboardShell({ children, navItems, userName, userRole, userIni
                           )}
 
                         </div>
-                        )}
+                          )}
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}
