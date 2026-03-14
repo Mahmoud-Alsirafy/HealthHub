@@ -42,5 +42,14 @@ class DoctorTable extends Seeder
             'department' => 'Cardiology',
             'experience_years' => 10,
         ]);
+        Doctor::create([
+            'name'     => 'Dr. Mahmoud Alsirafy',
+            'email'    => 'alsirafy123@gmail.com',
+            'password' => bcrypt('123'),
+            'specialty' => 'Cardiologist',
+            'facility'  => 'oi institute',
+            'department' => 'Cardiology',
+            'experience_years' => 10,
+        ]);
     }
 }
