@@ -54,16 +54,6 @@ import { toast } from "sonner"
 import { InputOTP, InputOTPGroup, InputOTPSlot, InputOTPSeparator } from "@/components/ui/input-otp"
 import { verifyPatientAccessApi } from "@/lib/api"
 
-const navItems = [
-  { title: "Overview", href: "/dashboard/doctor", icon: LayoutDashboard },
-  { title: "Search Patient", href: "/dashboard/doctor", icon: Search },
-  { title: "My Patients", href: "/dashboard/doctor", icon: Users, badge: "4" },
-  { title: "Add Diagnosis", href: "/dashboard/doctor", icon: Stethoscope },
-  { title: "QR Code", href: "/dashboard/doctor", icon: QrCode },
-  { title: "Prescriptions", href: "/dashboard/doctor", icon: Pill },
-  { title: "Lab Results", href: "/dashboard/doctor", icon: FlaskConical },
-]
-
 export function DoctorDashboardContent() {
   const [isPending, startTransition] = useTransition()
   const [profile, setProfile] = useState<any>(null)
@@ -74,7 +64,7 @@ export function DoctorDashboardContent() {
   const [pendingPatient, setPendingPatient] = useState<{ id: number; name: string } | null>(null)
   const [otpCode, setOtpCode] = useState("")
   const [selectedPatient, setSelectedPatient] = useState<any>(null)
-  const [activeTab, setActiveTab] = useState("overview")
+  const [activeTab, setActiveTab] = useState("patients")
 
   // ✅ QR Scanner states
   const [scannerOpen, setScannerOpen] = useState(false)
@@ -92,7 +82,40 @@ export function DoctorDashboardContent() {
   const [qrImage, setQrImage] = useState<string | null>(null)
   const [qrLoading, setQrLoading] = useState(false)
 
-  const token = typeof window !== 'undefined' ? localStorage.getItem("auth_token") : null
+  const token = typeof window !== "undefined" ? localStorage.getItem("auth_token") : null
+
+  const navItems = [
+    {
+      title: "Overview",
+      icon: LayoutDashboard,
+      onClick: () => setActiveTab("patients"),
+      isActive: activeTab === "patients",
+    },
+    {
+      title: "My Patients",
+      icon: Users,
+      onClick: () => setActiveTab("patients"),
+      isActive: activeTab === "patients",
+    },
+    {
+      title: "Search Patient",
+      icon: Search,
+      onClick: () => setActiveTab("search"),
+      isActive: activeTab === "search",
+    },
+    {
+      title: "Add Diagnosis",
+      icon: Stethoscope,
+      onClick: () => setActiveTab("diagnosis"),
+      isActive: activeTab === "diagnosis",
+    },
+    {
+      title: "QR Code",
+      icon: QrCode,
+      onClick: () => setActiveTab("qr"),
+      isActive: activeTab === "qr",
+    },
+  ]
 
   useEffect(() => {
     if (!token) return
