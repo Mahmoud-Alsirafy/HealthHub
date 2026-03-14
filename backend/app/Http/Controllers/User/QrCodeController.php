@@ -66,27 +66,37 @@ class QrCodeController extends Controller
      */
     public function loginWithQr(string $code)
     {
-        $user = User::where('qr_code', $code)->first();
+        $guards = [
+            'api'       => \App\Models\User::class,
+            'doctor'    => \App\Models\Doctor::class,
+            'lap'       => \App\Models\Lap::class,
+            'pharma'    => \App\Models\Pharma::class,
+            'paramedic' => \App\Models\Paramedic::class,
+        ];
 
-        if (!$user) {
-            return response()->json([
-                'error' => 'Invalid QR Code',
-            ], 401);
+        foreach ($guards as $guard => $model) {
+            $user = $model::where('qr_code', $code)->first();
+
+            if ($user) {
+                // Generate JWT token for the user
+                $jwtToken = Auth::guard($guard)->login($user);
+
+                return response()->json([
+                    'message' => 'Logged in successfully via QR',
+                    'token'   => $jwtToken,
+                    'type'    => ($guard === 'api' ? 'users' : $guard . 's'),
+                    'user'    => [
+                        'id'    => $user->id,
+                        'name'  => $user->name,
+                        'email' => $user->email,
+                    ],
+                ]);
+            }
         }
 
-        // Generate JWT token for the user
-        $jwtToken = Auth::guard('api')->login($user);
-
         return response()->json([
-            'message' => 'Logged in successfully via QR',
-            'token'   => $jwtToken,
-            'type'    => 'users',
-            'user'    => [
-                'id'    => $user->id,
-                'name'  => $user->name,
-                'email' => $user->email,
-            ],
-        ]);
+            'error' => 'Invalid QR Code',
+        ], 401);
     }
 
     /**
@@ -94,10 +104,8 @@ class QrCodeController extends Controller
      */
     private function generateQrBase64(string $code): string
     {
-        $loginUrl = config('app.url') . '/api/qr/login/' . $code;
-
         $writer = new PngWriter();
-        $qrCode = QrCode::create($loginUrl)
+        $qrCode = QrCode::create($code)
             ->setSize(300)
             ->setMargin(10);
 
@@ -111,10 +119,8 @@ class QrCodeController extends Controller
      */
     private function sendQrToEmail($user)
     {
-        $loginUrl = config('app.url') . '/api/qr/login/' . $user->qr_code;
-
         $writer = new PngWriter();
-        $qrCode = QrCode::create($loginUrl)
+        $qrCode = QrCode::create($user->qr_code)
             ->setSize(300)
             ->setMargin(10);
 
@@ -129,7 +135,7 @@ class QrCodeController extends Controller
         }
 
         // Save the image
-        Storage::disk('local')->put($relativePath, $result->getString());
+        Storage::disk('QR')->put($fileName, $result->getString());
 
         // Send Email
         Mail::to($user->email)->send(new SendQrMail(
