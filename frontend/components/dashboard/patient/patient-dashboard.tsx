@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import {
   LayoutDashboard, FileText, QrCode as QrIcon, Calendar, AlertTriangle,
   User as UserIcon, Plus, Trash2, Download, Upload, Phone as PhoneIcon,
-  Droplets, Scale, TrendingUp,
+  Droplets, Scale, TrendingUp, Sparkles, Loader2
 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -18,8 +18,10 @@ import { DashboardShell } from "@/components/dashboard/dashboard-shell"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   getProfileApi, updateBasicProfileApi, updatePatientProfileApi,
-  getFilesApi, uploadFileApi, deleteFileApi, getQrApi, regenerateQrApi, API_BASE_URL, getAppointmentsApi,
+  getFilesApi, uploadFileApi, deleteFileApi, getQrApi, regenerateQrApi,
+  API_BASE_URL, getAppointmentsApi, analyzeMedicalImageApi,
 } from "@/lib/api"
+import ReactMarkdown from "react-markdown"
 import { useToast } from "@/hooks/use-toast"
 
 export default function PatientDashboardContent() {
@@ -32,6 +34,10 @@ export default function PatientDashboardContent() {
   const [appointments, setAppointments] = useState<any[]>([])
   const [qrImage, setQrImage] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState("overview")
+
+  // AI Analysis states
+  const [analyzing, setAnalyzing] = useState<number | null>(null)
+  const [analysisResult, setAnalysisResult] = useState<{ id: number; text: string } | null>(null)
 
   // Profile form states
   const [name, setName] = useState("")
@@ -203,6 +209,28 @@ export default function PatientDashboardContent() {
     }
   }
 
+  const handleAnalyzeImage = async (file: any) => {
+    if (!token) return
+    setAnalyzing(file.id)
+    setAnalysisResult(null)
+    try {
+      const res = await analyzeMedicalImageApi(token, {
+        folder: "PatientProfile",
+        model_id: profile?.profile?.id,
+        filename: file.filename,
+      })
+      if (res.success) {
+        setAnalysisResult({ id: file.id, text: res.explanation })
+      } else {
+        toast({ title: "Analysis Failed", description: res.message, variant: "destructive" })
+      }
+    } catch {
+      toast({ title: "Error", description: "Failed to analyze image.", variant: "destructive" })
+    } finally {
+      setAnalyzing(null)
+    }
+  }
+
   const getFileUrl = (file: any) => {
     const baseUrl = API_BASE_URL.replace('/api', '')
     return `${baseUrl}/attachments/PatientProfile/${profile?.profile?.id}/${file.filename}`
@@ -210,19 +238,15 @@ export default function PatientDashboardContent() {
 
   const upcomingAppointments = appointments.filter((a) => {
     if (!a.next_visit_date) return false
-    const today = new Date()
-    const date = new Date(a.next_visit_date)
-    today.setHours(0, 0, 0, 0)
-    date.setHours(0, 0, 0, 0)
+    const today = new Date(); const date = new Date(a.next_visit_date)
+    today.setHours(0, 0, 0, 0); date.setHours(0, 0, 0, 0)
     return date >= today
   })
 
   const pastAppointments = appointments.filter((a) => {
     if (!a.next_visit_date) return false
-    const today = new Date()
-    const date = new Date(a.next_visit_date)
-    today.setHours(0, 0, 0, 0)
-    date.setHours(0, 0, 0, 0)
+    const today = new Date(); const date = new Date(a.next_visit_date)
+    today.setHours(0, 0, 0, 0); date.setHours(0, 0, 0, 0)
     return date < today
   })
 
@@ -230,17 +254,14 @@ export default function PatientDashboardContent() {
     { title: "Overview", icon: LayoutDashboard, onClick: () => setActiveTab("overview"), isActive: activeTab === "overview" },
     { title: "Medical Records", icon: FileText, onClick: () => setActiveTab("records"), isActive: activeTab === "records" },
     {
-      title: "Appointments",
-      icon: Calendar,
+      title: "Appointments", icon: Calendar,
       badge: upcomingAppointments.length ? String(upcomingAppointments.length) : undefined,
-      onClick: () => setActiveTab("appointments"),
-      isActive: activeTab === "appointments",
+      onClick: () => setActiveTab("appointments"), isActive: activeTab === "appointments",
     },
     { title: "QR Code", icon: QrIcon, onClick: () => setActiveTab("qr"), isActive: activeTab === "qr" },
     { title: "Profile", icon: UserIcon, onClick: () => setActiveTab("settings"), isActive: activeTab === "settings" },
   ]
 
-  // Overview stats built from real API data
   const overviewStats = [
     { label: "Medical Files", value: String(files.length), icon: FileText, change: "Uploaded records", color: "text-primary" },
     { label: "Blood Type", value: profile?.profile?.blood_type || "N/A", icon: Droplets, change: "On file", color: "text-destructive" },
@@ -270,7 +291,6 @@ export default function PatientDashboardContent() {
         </div>
       ) : (
         <div className="flex flex-col gap-6">
-          {/* Header */}
           <div>
             <h1 className="text-2xl font-bold text-foreground">
               Welcome back, {profile?.name?.split(" ")[0] || "there"}
@@ -290,7 +310,6 @@ export default function PatientDashboardContent() {
             {/* ── OVERVIEW ── */}
             <TabsContent value="overview" className="mt-4">
               <div className="flex flex-col gap-6">
-                {/* Stats cards */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   {overviewStats.map((s) => (
                     <div key={s.label} className="rounded-xl border border-border bg-card p-5">
@@ -304,7 +323,6 @@ export default function PatientDashboardContent() {
                   ))}
                 </div>
 
-                {/* Quick actions */}
                 <div className="flex flex-wrap gap-3">
                   <button onClick={() => setActiveTab("records")}
                     className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors">
@@ -320,7 +338,6 @@ export default function PatientDashboardContent() {
                   </button>
                 </div>
 
-                {/* Profile summary vitals */}
                 <div>
                   <h2 className="text-lg font-semibold text-foreground mb-4">Profile Summary</h2>
                   <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
@@ -331,15 +348,12 @@ export default function PatientDashboardContent() {
                           {v.value}<span className="text-xs text-muted-foreground ml-1">{v.unit}</span>
                         </div>
                         <div className="text-xs text-muted-foreground mt-1">{v.label}</div>
-                        <div className="inline-block mt-2 rounded-full bg-accent/10 px-2 py-0.5 text-[10px] font-medium text-accent">
-                          {v.status}
-                        </div>
+                        <div className="inline-block mt-2 rounded-full bg-accent/10 px-2 py-0.5 text-[10px] font-medium text-accent">{v.status}</div>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                {/* Info + Medical baseline */}
                 <div className="grid lg:grid-cols-2 gap-6">
                   <div className="rounded-xl border border-border bg-card">
                     <div className="p-5 border-b border-border">
@@ -471,22 +485,67 @@ export default function PatientDashboardContent() {
                               </Button>
                             </div>
                           </div>
+
                           <div className="p-4 flex flex-col flex-1">
                             <div className="flex items-center justify-between mb-1">
                               <Badge variant="secondary" className="text-[10px] font-bold uppercase tracking-wider">{file.type?.replace('_', ' ')}</Badge>
                               <span className="text-[10px] text-muted-foreground">{new Date(file.created_at).toLocaleDateString()}</span>
                             </div>
-                            <h4 className="font-bold text-base mb-4 flex-1">{file.title}</h4>
+                            <h4 className="font-bold text-base mb-3 flex-1">{file.title}</h4>
+
                             <div className="flex gap-2">
-                              <Button variant="outline" size="sm" className="flex-1 text-xs h-9 rounded-xl" onClick={() => window.open(getFileUrl(file), '_blank')}>Preview</Button>
-                              <Button variant="secondary" size="icon" className="h-9 w-9 rounded-xl" onClick={() => handleDownloadFile(file)}>
-                                <Download className="h-4 w-4" />
+                              <Button variant="outline" size="sm" className="flex-1 text-xs h-9 rounded-xl" onClick={() => window.open(getFileUrl(file), '_blank')}>
+                                Preview
                               </Button>
                             </div>
+
+                            {/* ✅ زر الـ AI بس - من غير النتيجة */}
+                            {file.filename.match(/\.(jpg|jpeg|png|webp)$/i) && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="w-full text-xs h-9 rounded-xl mt-2 border-primary/30 text-primary hover:bg-primary/5"
+                                onClick={() => handleAnalyzeImage(file)}
+                                disabled={analyzing === file.id}
+                              >
+                                {analyzing === file.id ? (
+                                  <><Loader2 className="mr-2 h-3 w-3 animate-spin" /> Analyzing...</>
+                                ) : (
+                                  <><Sparkles className="mr-2 h-3 w-3" /> AI Analysis</>
+                                )}
+                              </Button>
+                            )}
                           </div>
                         </div>
                       ))}
                     </div>
+
+                    {/* ✅ النتيجة هنا تحت الـ grid كلها */}
+                    {analysisResult && (
+                      <div className="mt-6 p-4 rounded-xl bg-primary/5 border border-primary/20">
+                        <div className="flex items-center justify-between mb-3">
+                          <p className="text-sm font-semibold text-primary flex items-center gap-2">
+                            <Sparkles className="h-4 w-4" />
+                            AI Analysis — {files.find(f => f.id === analysisResult.id)?.title}
+                          </p>
+                          <button
+                            className="text-xs text-muted-foreground hover:text-destructive transition-colors"
+                            onClick={() => setAnalysisResult(null)}
+                          >
+                            Dismiss ✕
+                          </button>
+                        </div>
+                        <div className="prose prose-sm max-w-none text-muted-foreground text-xs leading-relaxed
+        [&>p]:mb-2 [&>ul]:list-disc [&>ul]:pl-4 [&>ul]:mb-2
+        [&>ol]:list-decimal [&>ol]:pl-4 [&>ol]:mb-2
+        [&>h1]:text-sm [&>h1]:font-bold [&>h1]:text-foreground
+        [&>h2]:text-sm [&>h2]:font-bold [&>h2]:text-foreground
+        [&>h3]:text-xs [&>h3]:font-semibold [&>h3]:text-foreground
+        [&>strong]:font-semibold [&>strong]:text-foreground">
+                          <ReactMarkdown>{analysisResult.text}</ReactMarkdown>
+                        </div>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               </div>
@@ -500,7 +559,6 @@ export default function PatientDashboardContent() {
                   <CardDescription>Keep your personal and medical information current.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  {/* Personal */}
                   <div className="space-y-4">
                     <h3 className="text-lg font-semibold border-b pb-2 flex items-center gap-2">
                       <UserIcon className="h-5 w-5 text-primary" /> Personal Information
@@ -534,7 +592,6 @@ export default function PatientDashboardContent() {
                     </div>
                   </div>
 
-                  {/* Location */}
                   <div className="space-y-4">
                     <h3 className="text-lg font-semibold border-b pb-2 flex items-center gap-2">
                       <LayoutDashboard className="h-5 w-5 text-primary" /> Location & Address
@@ -546,7 +603,6 @@ export default function PatientDashboardContent() {
                     <div className="space-y-2"><Label>Full Address</Label><Textarea value={address} onChange={(e) => setAddress(e.target.value)} className="min-h-[60px] rounded-xl" /></div>
                   </div>
 
-                  {/* Medical */}
                   <div className="space-y-4">
                     <h3 className="text-lg font-semibold border-b pb-2 flex items-center gap-2">
                       <AlertTriangle className="h-5 w-5 text-primary" /> Medical Information
@@ -556,7 +612,7 @@ export default function PatientDashboardContent() {
                         <Label>Blood Type</Label>
                         <Select value={bloodType} onValueChange={setBloodType}>
                           <SelectTrigger className="rounded-xl"><SelectValue placeholder="Select type" /></SelectTrigger>
-                          <SelectContent>{["A+","A-","B+","B-","AB+","AB-","O+","O-"].map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
+                          <SelectContent>{["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"].map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
                         </Select>
                       </div>
                       <div className="space-y-2"><Label>Height (cm)</Label><Input type="number" value={height} onChange={(e) => setHeight(e.target.value)} className="rounded-xl" /></div>
@@ -571,7 +627,6 @@ export default function PatientDashboardContent() {
                     <div className="space-y-2"><Label>Family Medical History</Label><Textarea value={familyHistory} onChange={(e) => setFamilyHistory(e.target.value)} className="min-h-[80px] rounded-xl" /></div>
                   </div>
 
-                  {/* Emergency Contact */}
                   <div className="space-y-4">
                     <h3 className="text-lg font-semibold border-b pb-2 flex items-center gap-2">
                       <PhoneIcon className="h-5 w-5 text-primary" /> Emergency Contact
@@ -598,8 +653,7 @@ export default function PatientDashboardContent() {
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <Calendar className="h-5 w-5 text-primary" />
-                      Upcoming Visits
+                      <Calendar className="h-5 w-5 text-primary" /> Upcoming Visits
                     </CardTitle>
                     <CardDescription>Follow-up dates set by your doctors.</CardDescription>
                   </CardHeader>
@@ -617,52 +671,22 @@ export default function PatientDashboardContent() {
                     ) : (
                       <div className="space-y-4">
                         {upcomingAppointments.map((a) => (
-                          <div
-                            key={a.id}
-                            className="flex flex-col md:flex-row md:items-center justify-between gap-3 rounded-xl border bg-card px-4 py-3 hover:bg-muted/60 transition-colors"
-                          >
+                          <div key={a.id} className="flex flex-col md:flex-row md:items-center justify-between gap-3 rounded-xl border bg-card px-4 py-3 hover:bg-muted/60 transition-colors">
                             <div className="space-y-1">
                               <div className="flex items-center gap-2">
-                                <span className="font-semibold text-foreground">
-                                  {a.doctor_name || "Doctor"}
-                                </span>
-                                {a.specialty && (
-                                  <Badge variant="outline" className="text-xs">
-                                    {a.specialty}
-                                  </Badge>
-                                )}
+                                <span className="font-semibold text-foreground">{a.doctor_name || "Doctor"}</span>
+                                {a.specialty && <Badge variant="outline" className="text-xs">{a.specialty}</Badge>}
                               </div>
-                              {a.facility && (
-                                <p className="text-xs text-muted-foreground">
-                                  {a.facility}
-                                </p>
-                              )}
-                              {a.diagnosis && (
-                                <p className="text-xs text-muted-foreground line-clamp-2">
-                                  Diagnosis: {a.diagnosis}
-                                </p>
-                              )}
-                              {a.notes && (
-                                <p className="text-xs text-muted-foreground line-clamp-2">
-                                  Notes: {a.notes}
-                                </p>
-                              )}
-                              {a.required_tests && (
-                                <p className="text-xs text-muted-foreground line-clamp-2">
-                                  Required tests: {a.required_tests}
-                                </p>
-                              )}
+                              {a.facility && <p className="text-xs text-muted-foreground">{a.facility}</p>}
+                              {a.diagnosis && <p className="text-xs text-muted-foreground line-clamp-2">Diagnosis: {a.diagnosis}</p>}
+                              {a.notes && <p className="text-xs text-muted-foreground line-clamp-2">Notes: {a.notes}</p>}
+                              {a.required_tests && <p className="text-xs text-muted-foreground line-clamp-2">Required tests: {a.required_tests}</p>}
                             </div>
                             <div className="flex flex-col items-start md:items-end gap-1">
                               <Badge className="rounded-full px-3 py-1 text-xs">
-                                Next visit:{" "}
-                                {new Date(a.next_visit_date).toLocaleDateString()}
+                                Next visit: {new Date(a.next_visit_date).toLocaleDateString()}
                               </Badge>
-                              {a.created_at && (
-                                <span className="text-[11px] text-muted-foreground">
-                                  Set on {new Date(a.created_at).toLocaleString()}
-                                </span>
-                              )}
+                              {a.created_at && <span className="text-[11px] text-muted-foreground">Set on {new Date(a.created_at).toLocaleString()}</span>}
                             </div>
                           </div>
                         ))}
@@ -674,43 +698,20 @@ export default function PatientDashboardContent() {
                 {pastAppointments.length > 0 && (
                   <Card>
                     <CardHeader>
-                      <CardTitle className="text-sm font-semibold">
-                        Visit History
-                      </CardTitle>
-                      <CardDescription className="text-xs">
-                        Previous follow-up dates that have already passed.
-                      </CardDescription>
+                      <CardTitle className="text-sm font-semibold">Visit History</CardTitle>
+                      <CardDescription className="text-xs">Previous follow-up dates that have already passed.</CardDescription>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-3">
                         {pastAppointments.map((a) => (
-                          <div
-                            key={a.id}
-                            className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b last:border-0 pb-3 last:pb-0"
-                          >
+                          <div key={a.id} className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b last:border-0 pb-3 last:pb-0">
                             <div className="space-y-0.5">
-                              <p className="text-sm font-medium">
-                                {a.doctor_name || "Doctor"}
-                              </p>
-                              {a.diagnosis && (
-                                <p className="text-xs text-muted-foreground line-clamp-1">
-                                  Diagnosis: {a.diagnosis}
-                                </p>
-                              )}
-                              {a.notes && (
-                                <p className="text-xs text-muted-foreground line-clamp-1">
-                                  Notes: {a.notes}
-                                </p>
-                              )}
-                              {a.required_tests && (
-                                <p className="text-xs text-muted-foreground line-clamp-1">
-                                  Required tests: {a.required_tests}
-                                </p>
-                              )}
+                              <p className="text-sm font-medium">{a.doctor_name || "Doctor"}</p>
+                              {a.diagnosis && <p className="text-xs text-muted-foreground line-clamp-1">Diagnosis: {a.diagnosis}</p>}
+                              {a.notes && <p className="text-xs text-muted-foreground line-clamp-1">Notes: {a.notes}</p>}
+                              {a.required_tests && <p className="text-xs text-muted-foreground line-clamp-1">Required tests: {a.required_tests}</p>}
                             </div>
-                            <span className="text-xs text-muted-foreground">
-                              {new Date(a.next_visit_date).toLocaleDateString()}
-                            </span>
+                            <span className="text-xs text-muted-foreground">{new Date(a.next_visit_date).toLocaleDateString()}</span>
                           </div>
                         ))}
                       </div>

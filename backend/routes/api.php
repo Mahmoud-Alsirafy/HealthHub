@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\registerController;
 use App\Http\Controllers\Doctor\DoctorController;
 use App\Http\Controllers\Doctor\DoctorQrCodeController;
 use App\Http\Controllers\OtpController;
+use App\Http\Controllers\User\MedicalImageAnalysisController;
 use App\Http\Controllers\User\ProfileController;
 use App\Http\Controllers\User\QrCodeController;
 use Illuminate\Support\Facades\Route;
@@ -57,6 +58,8 @@ Route::middleware('auth:api')->prefix('user')->group(function () {
     Route::get('/files', [ProfileController::class, 'getFiles']);
     Route::post('/files', [ProfileController::class, 'storeMedicalFile']);
     Route::delete('/files/{id}', [ProfileController::class, 'destroyFile']);
+
+     Route::post('/medical-image/analyze', [MedicalImageAnalysisController::class, 'analyze']);
 });
 
 // -------------------------------------------------------

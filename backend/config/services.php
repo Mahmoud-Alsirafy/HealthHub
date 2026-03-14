@@ -40,5 +40,9 @@ return [
         'redirect'      => env('GOOGLE_REDIRECT'),
     ],
 
+    'openrouter' => [
+        'key' => env('OPENROUTER_KEY'),
+
+    ],
 
 ];

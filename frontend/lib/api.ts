@@ -298,3 +298,17 @@ export const verifyPatientAccessApi = async (token: string, data: { patient_id: 
   });
   return res.json();
 };
+
+// ✅ أضف دي في api.ts
+export async function analyzeMedicalImageApi(token: string, data: { folder: string; model_id: number; filename: string }) {
+  const response = await fetch(`${API_BASE_URL}/user/medical-image/analyze`, {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  })
+  return response.json()
+}
