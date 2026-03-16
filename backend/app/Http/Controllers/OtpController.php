@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Doctor;
-use App\Models\Lap;
+use App\Models\Lab;
 use App\Models\Pharma;
 use App\Models\Paramedic;
 use App\Notifications\Otp;
@@ -40,7 +40,7 @@ class OtpController extends Controller
         $models = [
             'users' => User::class,
             'doctors' => Doctor::class,
-            'laps' => Lap::class,
+            'labs' => Lab::class,
             'pharmas' => Pharma::class,
             'paramedics' => Paramedic::class,
         ];

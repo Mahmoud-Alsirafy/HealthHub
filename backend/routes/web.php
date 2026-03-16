@@ -1,29 +1,9 @@
 <?php
 
-use App\Http\Controllers\Image\ImageController;
 use App\Http\Controllers\Google\GoogleController;
+use App\Http\Controllers\Image\ImageController;
 use Illuminate\Support\Facades\Route;
-
-
-
-
-
-
-
-
-
-Route::get('/lap', function () {
-    return response()->json(['message' => 'Lap Dashboard']);
-})->middleware('auth:lap')->name('lap.dashboard');
-
-Route::get('/pharma', function () {
-    return response()->json(['message' => 'Pharma Dashboard']);
-})->middleware('auth:pharma')->name('pharma.dashboard');
-
-Route::get('/paramedics', function () {
-    return response()->json(['message' => 'Paramedics Dashboard']);
-})->middleware('auth:paramedic')->name('paramedics.dashboard');
-
+use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
 
 // -----------------------------------------------------------------------------
 // Commented / Localization (for reference)

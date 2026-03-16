@@ -41,7 +41,7 @@
                                 <a class="btn btn-default col-lg-3" title='doctors' href="{{route('login.show','doctors')}}">
                                     <img alt="user-img" width="100px;" src="{{URL::asset('assets/images/parent.png')}}">
                                 </a>
-                                <a class="btn btn-default col-lg-3" title="laps" href="{{route('login.show','laps')}}">
+                                <a class="btn btn-default col-lg-3" title="labs" href="{{route('login.show','labs')}}">
                                     <img alt="user-img" width="100px;" src="{{URL::asset('assets/images/teacher.png')}}">
                                 </a>
                                 <a class="btn btn-default col-lg-3" title="pharmas" href="{{route('login.show','pharmas')}}">

@@ -51,9 +51,9 @@ return [
         'driver'   => 'jwt',      // ← غير من session لـ jwt
         'provider' => 'doctors',
     ],
-    'lap' => [
+    'lab' => [
         'driver'   => 'jwt',
-        'provider' => 'laps',
+        'provider' => 'labs',
     ],
     'pharma' => [
         'driver'   => 'jwt',
@@ -91,9 +91,9 @@ return [
         'driver' => 'eloquent',
         'model'  => App\Models\Doctor::class,    // ✅
     ],
-    'laps' => [
+    'labs' => [
         'driver' => 'eloquent',
-        'model'  => App\Models\Lap::class,       // ✅
+        'model'  => App\Models\Lab::class,       // ✅
     ],
     'pharmas' => [
         'driver' => 'eloquent',

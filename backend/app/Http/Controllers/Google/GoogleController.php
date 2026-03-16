@@ -37,7 +37,7 @@ public function googlepagecallback(Request $request)
         'users'      => ['guard' => 'api',      'model' => \App\Models\User::class],
         'doctors'    => ['guard' => 'doctor',    'model' => \App\Models\Doctor::class],
         'pharmas'    => ['guard' => 'pharma',    'model' => \App\Models\Pharma::class],
-        'laps'       => ['guard' => 'lap',       'model' => \App\Models\Lap::class],
+        'labs'       => ['guard' => 'lab',       'model' => \App\Models\Lab::class],
         'paramedics' => ['guard' => 'paramedic', 'model' => \App\Models\Paramedic::class],
     ];
 

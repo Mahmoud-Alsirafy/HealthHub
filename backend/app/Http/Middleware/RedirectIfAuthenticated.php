@@ -22,8 +22,8 @@ class RedirectIfAuthenticated
         if (auth('doctor')->check()) {
             return redirect(RouteServiceProvider::DOCTOR);
         }
-        if (auth('lap')->check()) {
-            return redirect(RouteServiceProvider::LAP);
+        if (auth('lab')->check()) {
+            return redirect(RouteServiceProvider::LAB);
         }
         if (auth('pharma')->check()) {
             return redirect(RouteServiceProvider::PHARAMAS);

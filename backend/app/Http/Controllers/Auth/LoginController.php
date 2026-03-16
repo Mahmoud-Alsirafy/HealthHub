@@ -19,7 +19,7 @@ class LoginController extends Controller
     $request->validate([
         'email'    => 'required|email',
         'password' => 'required|string',
-        'type'     => 'required|in:users,doctors,laps,pharmas,paramedics',
+        'type'     => 'required|in:users,doctors,labs,pharmas,paramedics',
     ]);
 
     $guard = $this->checkGuard($request);
@@ -92,7 +92,7 @@ class LoginController extends Controller
     // api/user/me  → auth:api
     // api/doctor/me → auth:doctor
 
-    $guards = ['api', 'doctor', 'lap', 'pharma', 'paramedic'];
+    $guards = ['api', 'doctor', 'lab', 'pharma', 'paramedic'];
 
     foreach ($guards as $guard) {
         if (auth()->guard($guard)->check()) {

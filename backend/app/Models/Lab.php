@@ -6,7 +6,7 @@ namespace App\Models;
 use App\Traits\HasOtp;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
-class Lap extends Authenticatable implements JWTSubject
+class Lab extends Authenticatable implements JWTSubject
 {
     use HasOtp;
 

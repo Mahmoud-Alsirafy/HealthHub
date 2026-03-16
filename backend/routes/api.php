@@ -83,10 +83,10 @@ Route::middleware('auth:doctor')->prefix('doctor')->group(function () {
 // -------------------------------------------------------
 // Labs Routes (Protected)
 // -------------------------------------------------------
-Route::middleware('auth:lap')->prefix('lap')->group(function () {
+Route::middleware('auth:lab')->prefix('lab')->group(function () {
 
-    Route::post('/logout', [LoginController::class, 'logout'])->name('api.lap.logout');
-    Route::get('/me', [LoginController::class, 'me'])->name('api.lap.me');
+    Route::post('/logout', [LoginController::class, 'logout'])->name('api.lab.logout');
+    Route::get('/me', [LoginController::class, 'me'])->name('api.lab.me');
 });
 
 // -------------------------------------------------------

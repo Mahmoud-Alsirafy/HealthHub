@@ -3,9 +3,8 @@
 namespace Database\Seeders;
 
 
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Database\Seeders\LapTable;
-// use Database\Seeders\UserTable;
+use Database\Seeders\LabTable;
+use Database\Seeders\UserTable;
 use Illuminate\Database\Seeder;
 use Database\Seeders\DoctorTable;
 use Database\Seeders\PharmaTable;
@@ -22,7 +21,7 @@ class DatabaseSeeder extends Seeder
         $this->call(DoctorTable::class);
         $this->call(PharmaTable::class);
         $this->call(ParamedicTable::class);
-        $this->call(LapTable::class);
+        $this->call(LabTable::class);
 
     }
 }

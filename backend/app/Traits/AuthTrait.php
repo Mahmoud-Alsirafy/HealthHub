@@ -11,7 +11,7 @@ trait AuthTrait
      *
      * users      → api      (JWT)
      * doctors    → doctor   (JWT)
-     * laps       → lap      (JWT)
+     * labs       → lab      (JWT)
      * pharmas    → pharma   (JWT)
      * paramedics → paramedic (JWT)
      */
@@ -20,7 +20,7 @@ trait AuthTrait
         $guards = [
             'users'      => 'api',        // ✅ غيرنا من 'web' لـ 'api'
             'doctors'    => 'doctor',
-            'laps'       => 'lap',
+            'labs'       => 'lab',
             'pharmas'    => 'pharma',
             'paramedics' => 'paramedic',
         ];
@@ -36,7 +36,7 @@ trait AuthTrait
         $redirects = [
             'users'      => RouteServiceProvider::USER,
             'doctors'    => RouteServiceProvider::DOCTOR,
-            'laps'       => RouteServiceProvider::LAP,
+            'labs'       => RouteServiceProvider::LAB,
             'pharmas'    => RouteServiceProvider::PHARAMAS,
             'paramedics' => RouteServiceProvider::PARAMEDICS,
         ];
@@ -49,7 +49,7 @@ trait AuthTrait
     $models = [
         'api'       => \App\Models\User::class,
         'doctor'    => \App\Models\Doctor::class,
-        'lap'       => \App\Models\Lap::class,
+        'lab'       => \App\Models\Lab::class,
         'pharma'    => \App\Models\Pharma::class,
         'paramedic' => \App\Models\Paramedic::class,
     ];

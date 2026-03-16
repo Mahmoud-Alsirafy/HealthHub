@@ -66,8 +66,8 @@
                         <div class="login-fancy pb-40 clearfix">
                             @if($type == 'doctors')
                             <h3 style="font-family: 'Cairo', sans-serif" class="mb-30">تسجيل دخول doctors</h3>
-                            @elseif($type == 'laps')
-                            <h3 style="font-family: 'Cairo', sans-serif" class="mb-30">تسجيل دخولlaps </h3>
+                            @elseif($type == 'labs')
+                            <h3 style="font-family: 'Cairo', sans-serif" class="mb-30">تسجيل دخولlabs </h3>
                             @elseif($type == 'pharmas')
                             <h3 style="font-family: 'Cairo', sans-serif" class="mb-30">تسجيل دخول pharmas</h3>
                             @elseif($type == 'paramedics')

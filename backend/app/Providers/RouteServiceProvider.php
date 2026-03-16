@@ -8,7 +8,7 @@ class RouteServiceProvider extends ServiceProvider
 {
     public const USER = '/user';
     public const DOCTOR = '/doctor/dashboard';
-    public const LAP = '/lap';
+    public const LAB = '/lab';
     public const PHARAMAS = '/pharma';
     public const PARAMEDICS = '/paramedics';
 
