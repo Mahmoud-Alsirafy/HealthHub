@@ -18,7 +18,7 @@ class LabTable extends Seeder
         Lab::create([
             'name' => 'lab',
             'email' => 'wael@gmail.com',
-            'password' => Hash::make('1234567890'),
+            'password' => Hash::make('123'),
         ]);
     }
 }

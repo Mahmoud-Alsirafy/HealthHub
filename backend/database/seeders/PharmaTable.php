@@ -18,7 +18,7 @@ class PharmaTable extends Seeder
         Pharma::create([
             'name' => 'pharmas',
             'email' => 'wael@gmail.com',
-            'password' => Hash::make('1234567890'),
+            'password' => Hash::make('123'),
         ]);
     }
 }

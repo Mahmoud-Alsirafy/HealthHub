@@ -1,9 +1,9 @@
 <?php
 
 use App\Http\Controllers\Auth\LoginController;
-use App\Http\Controllers\Auth\registerController;
 use App\Http\Controllers\Doctor\DoctorController;
 use App\Http\Controllers\Doctor\DoctorQrCodeController;
+use App\Http\Controllers\Lab\LabController;
 use App\Http\Controllers\OtpController;
 use App\Http\Controllers\User\MedicalImageAnalysisController;
 use App\Http\Controllers\User\ProfileController;
@@ -28,7 +28,7 @@ Route::prefix('auth')->group(function () {
     Route::post('/login', [LoginController::class, 'login'])->name('api.login');
 
     // Register (users only)
-    Route::post('/register', [registerController::class, 'register'])->name('api.register');
+    Route::post('/register', [\App\Http\Controllers\Auth\registerController::class, 'register'])->name('api.register');
 });
 
 
@@ -87,6 +87,8 @@ Route::middleware('auth:lab')->prefix('lab')->group(function () {
 
     Route::post('/logout', [LoginController::class, 'logout'])->name('api.lab.logout');
     Route::get('/me', [LoginController::class, 'me'])->name('api.lab.me');
+    Route::post('/patients/search',              [LabController::class, 'searchPatient']);
+    Route::post('/reports/{reportId}/complete',  [LabController::class, 'completeReport']);
 });
 
 // -------------------------------------------------------

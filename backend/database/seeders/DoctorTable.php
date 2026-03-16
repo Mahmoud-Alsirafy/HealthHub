@@ -18,7 +18,7 @@ class DoctorTable extends Seeder
         Doctor::create([
             'name'     => 'Dr. wael El-Sayed',
             'email'    => 'wael@gmail.com',
-            'password' => bcrypt('123'),
+            'password' => Hash::make('123'),
             'specialty' => 'Cardiologist',
             'facility'  => 'Cairo University Hospital',
             'department' => 'Cardiology',

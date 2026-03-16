@@ -7,8 +7,6 @@ use App\Models\DoctorReport;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-
 class DoctorController extends Controller
 {
     // -------------------------------------------------------
@@ -122,38 +120,38 @@ class DoctorController extends Controller
         return response()->json([
             'status'     => 'pending',
             'patient_id' => $patient->id,
-            'patient_name' => $patient->name, // اسم بس - مش بيانات كاملة
+            'patient_name' => $patient->name,
             'message'    => 'OTP sent to patient. Ask them for the code.',
         ]);
     }
 
     public function verifyAccess(Request $request)
-{
-    $request->validate([
-        'patient_id' => 'required|exists:users,id',
-        'otp'        => 'required|string|size:6',
-    ]);
+    {
+        $request->validate([
+            'patient_id' => 'required|exists:users,id',
+            'otp'        => 'required|string|size:6',
+        ]);
 
-    $patient = User::where('id', $request->patient_id)
-                   ->where('code', $request->otp)
-                   ->first();
+        $patient = User::where('id', $request->patient_id)
+            ->where('code', $request->otp)
+            ->first();
 
-    // ✅ تحقق من الـ OTP والـ expiry
-    if (!$patient) {
-        return response()->json(['error' => 'Invalid OTP code'], 422);
+        // ✅ تحقق من الـ OTP والـ expiry
+        if (!$patient) {
+            return response()->json(['error' => 'Invalid OTP code'], 422);
+        }
+
+        if ($patient->expired_at < now()) {
+            return response()->json(['error' => 'OTP expired. Please search again.'], 422);
+        }
+
+        // ✅ امسح الـ OTP بعد الاستخدام
+        $patient->reset_code();
+
+        // ✅ رجّع البيانات الكاملة
+        $patient->load(['profile.images', 'doctorReports.doctor']);
+        return response()->json(['patient' => $this->formatPatient($patient)]);
     }
-
-    if ($patient->expired_at < now()) {
-        return response()->json(['error' => 'OTP expired. Please search again.'], 422);
-    }
-
-    // ✅ امسح الـ OTP بعد الاستخدام
-    $patient->reset_code();
-
-    // ✅ رجّع البيانات الكاملة
-    $patient->load(['profile.images', 'doctorReports.doctor']);
-    return response()->json(['patient' => $this->formatPatient($patient)]);
-}
 
     // -------------------------------------------------------
     // GET /api/doctor/patients/qr/{code}
@@ -182,20 +180,42 @@ class DoctorController extends Controller
             'patient_id'      => 'required|exists:users,id',
             'diagnosis'       => 'required|string',
             'notes'           => 'nullable|string',
-            'required_tests'  => 'nullable|string',
+            'required_tests'  => 'nullable',
             'next_visit_date' => 'nullable|date',
         ]);
 
         $doctor = Auth::guard('doctor')->user();
+
+        // ✅ بنحول لـ array في كل الحالات
+        $tests = [];
+
+        if ($request->filled('required_tests')) {
+            $tests = is_array($request->required_tests)
+                ? $request->required_tests
+                : array_filter(array_map('trim', explode(',', $request->required_tests)));
+        }
 
         $report = DoctorReport::create([
             'doctor_id'       => $doctor->id,
             'user_id'         => $request->patient_id,
             'diagnosis'       => $request->diagnosis,
             'notes'           => $request->notes,
-            'required_tests'  => $request->required_tests,
+            'required_tests'  => !empty($tests) ? implode(', ', $tests) : null,
             'next_visit_date' => $request->next_visit_date,
         ]);
+
+        // ✅ كل test بتتحفظ كـ row منفصلة في lab_reports
+        foreach ($tests as $test) {
+            if (!empty($test)) {
+                \App\Models\LabReport::create([
+                    'user_id'   => $request->patient_id,
+                    'lab_id'    => null,
+                    'report_id'=>$report->id,
+                    'test_name' => $test,
+                    'status'    => 'pending',
+                ]);
+            }
+        }
 
         return response()->json([
             'message' => 'تم حفظ التقرير بنجاح',

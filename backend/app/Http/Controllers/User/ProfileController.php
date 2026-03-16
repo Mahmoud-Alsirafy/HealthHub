@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\User;
 
 use App\Models\User;
-use App\Models\Image;
 use App\Models\DoctorReport;
 use App\Models\PatientProfile;
 use App\Traits\AttachFiles;
@@ -109,7 +108,7 @@ class ProfileController extends Controller
         // ✅ لو مفيش profile هيعمل واحد فاضي
         $profile = PatientProfile::firstOrCreate(['user_id' => $user->id]);
 
-        $this->uploadFile($request,$profile,'PatientProfile');
+        $this->uploadFile($request, $profile, 'PatientProfile');
 
         return response()->json([
             'message' => 'File uploaded successfully',

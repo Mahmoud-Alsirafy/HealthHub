@@ -2,21 +2,21 @@
 
 namespace App\Models;
 
-
 use App\Traits\HasOtp;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
+
 class Lab extends Authenticatable implements JWTSubject
 {
-    use HasOtp;
+     use HasFactory, Notifiable, HasOtp;
 
-    protected $fillable = ['name','email', 'password'];
-    protected $visible = [
-    'id',
-    'name',
-    'email',
-];
-     public function getJWTIdentifier()
+    protected $fillable = ['name', 'email', 'password'];
+
+    protected $visible = ['id', 'name', 'email'];
+
+    public function getJWTIdentifier()
     {
         return $this->getKey();
     }
@@ -24,5 +24,9 @@ class Lab extends Authenticatable implements JWTSubject
     public function getJWTCustomClaims()
     {
         return [];
+    }
+    public function reports()
+    {
+        return $this->hasMany(LabReport::class, 'lab_id');
     }
 }
