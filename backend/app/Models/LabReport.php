@@ -5,16 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 class LabReport extends Model
 {
-    protected $fillable = [
-        'user_id',
-        'lab_id',
-        'test_name',
-        'status',
-        'result',
-        'notes',
-        'file_path',
-        'completed_at',
-    ];
+    protected $guarded = [];
 
     protected $casts = [
         'completed_at' => 'datetime',
@@ -33,4 +24,8 @@ class LabReport extends Model
     {
         return $this->morphMany(Image::class, 'imageable');
     }
+    public function doctorReport()
+{
+    return $this->belongsTo(DoctorReport::class, 'report_id');
+}
 }

@@ -88,7 +88,6 @@ class LabController extends Controller
             'completed_at' => Carbon::now(),
         ]);
 
-        // ✅ الملفات بتتحفظ في images عبر الـ morph
         if ($request->hasFile('files')) {
             $this->uploadFile($request, $report, 'lab_result', $report->user_id);
         }
@@ -97,6 +96,43 @@ class LabController extends Controller
             'success' => true,
             'message' => 'Report marked as completed.',
             'report'  => $report->fresh()->load('images'),
+        ]);
+    }
+
+    public function verifyAccess(Request $request)
+    {
+        $request->validate([
+            'patient_id' => 'required|exists:users,id',
+            'otp'        => 'required|string|size:6',
+        ]);
+
+        $patient = User::where('id', $request->patient_id)
+            ->where('code', $request->otp)
+            ->first();
+
+        // ✅ تحقق من الـ OTP والـ expiry
+        if (!$patient) {
+            return response()->json(['error' => 'Invalid OTP code'], 422);
+        }
+
+        if ($patient->expired_at < now()) {
+            return response()->json(['error' => 'OTP expired. Please search again.'], 422);
+        }
+
+        // ✅ امسح الـ OTP بعد الاستخدام
+        $patient->reset_code();
+
+        // ✅ رجّع البيانات الكاملة
+        return response()->json([
+            'success'         => true,
+            'patient'         => [
+                'id'          => $patient->id,
+                'name'        => $patient->name,
+                'national_id' => $patient->national_id,
+            ],
+            'pending_reports' => LabReport::where('user_id', $patient->id)
+                ->where('status', 'pending')
+                ->get(['id', 'test_name', 'notes', 'created_at']),
         ]);
     }
 }

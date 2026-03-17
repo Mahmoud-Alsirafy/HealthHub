@@ -7,6 +7,7 @@ use App\Models\DoctorReport;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+
 class DoctorController extends Controller
 {
     // -------------------------------------------------------
@@ -188,7 +189,6 @@ class DoctorController extends Controller
 
         // ✅ بنحول لـ array في كل الحالات
         $tests = [];
-
         if ($request->filled('required_tests')) {
             $tests = is_array($request->required_tests)
                 ? $request->required_tests
@@ -204,13 +204,12 @@ class DoctorController extends Controller
             'next_visit_date' => $request->next_visit_date,
         ]);
 
-        // ✅ كل test بتتحفظ كـ row منفصلة في lab_reports
         foreach ($tests as $test) {
             if (!empty($test)) {
                 \App\Models\LabReport::create([
                     'user_id'   => $request->patient_id,
                     'lab_id'    => null,
-                    'report_id'=>$report->id,
+                    'report_id' => $report->id,
                     'test_name' => $test,
                     'status'    => 'pending',
                 ]);

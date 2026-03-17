@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('lab_reports', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreignId('lab_id')->references('id')->on('labs')->onDelete('cascade');
-            $table->foreignId('report_id')->references('id')->on('doctor_reports')->onDelete('cascade');
+            $table->foreignId('lab_id')->nullable()->references('id')->on('labs')->onDelete('cascade');
+            $table->foreignId('report_id')->nullable()->references('id')->on('doctor_reports')->onDelete('cascade');
             $table->string('test_name');          // اسم التحليل
             $table->string('status')->default('pending'); // pending / completed
             $table->text('result')->nullable();   // نتيجة التحليل

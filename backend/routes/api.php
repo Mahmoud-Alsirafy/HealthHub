@@ -88,6 +88,7 @@ Route::middleware('auth:lab')->prefix('lab')->group(function () {
     Route::post('/logout', [LoginController::class, 'logout'])->name('api.lab.logout');
     Route::get('/me', [LoginController::class, 'me'])->name('api.lab.me');
     Route::post('/patients/search',              [LabController::class, 'searchPatient']);
+    Route::post('/patients/verify-access',       [LabController::class, 'verifyAccess']);
     Route::post('/reports/{reportId}/complete',  [LabController::class, 'completeReport']);
 });
 

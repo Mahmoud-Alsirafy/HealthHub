@@ -124,14 +124,32 @@ class ProfileController extends Controller
         $user = User::find(Auth::guard('api')->id());
         $profile = PatientProfile::firstOrCreate(['user_id' => $user->id]);
 
-        $query = $profile->images();
+        $profileImages = $profile->images()->latest()->get();
+        
+        // Fetch lab report images as well
+        $labImages = collect();
+        $labReports = \App\Models\LabReport::where('user_id', $user->id)->with('images')->latest()->get();
+        foreach ($labReports as $report) {
+            foreach ($report->images as $img) {
+                // To distinguish in frontend
+                if (!$img->title) {
+                    $img->title = "Lab Result: " . $report->test_name;
+                }
+                if (!$img->type) {
+                    $img->type = "lab_result";
+                }
+                $labImages->push($img);
+            }
+        }
+
+        $allFiles = $profileImages->merge($labImages)->sortByDesc('created_at')->values();
 
         if ($request->type) {
-            $query->where('type', $request->type);
+            $allFiles = $allFiles->where('type', $request->type)->values();
         }
 
         return response()->json([
-            'files' => $query->latest()->get(),
+            'files' => $allFiles,
         ]);
     }
 

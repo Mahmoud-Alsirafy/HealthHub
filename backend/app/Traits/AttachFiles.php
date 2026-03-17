@@ -14,13 +14,13 @@ trait AttachFiles
             $files = [$files];
         }
 
-        // ✅ بنحدد الـ user_id — لو مش متبعت بناخده من الـ model نفسه
         $userId = $userId ?? $model->user_id ?? $model->id;
 
         foreach ($files as $file) {
+            if (!$file) continue; // ✅ تجاهل لو null
+
             $fileName = $file->getClientOriginalName();
 
-            // ✅ attachments/{user_id}/{folder}/filename
             $file->storeAs(
                 'attachments/' . $userId . '/' . $folder,
                 $fileName,
@@ -29,10 +29,10 @@ trait AttachFiles
 
             $model->images()->create([
                 'filename' => $fileName,
-                'type'     => $request->type,
-                'title'    => $request->title,
-                'notes'    => $request->notes,
-                'date'     => $request->date,
+                'type'     => $request->type ?? $folder,    // ✅ لو مش متبعت بناخد اسم الـ folder
+                'title'    => $request->title ?? $fileName, // ✅ لو مش متبعت بناخد اسم الملف
+                'notes'    => $request->notes ?? null,
+                'date'     => $request->date ?? now(),       // ✅ لو مش متبعت بناخد التاريخ الحالي
             ]);
         }
     }
