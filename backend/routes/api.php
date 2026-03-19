@@ -6,6 +6,7 @@ use App\Http\Controllers\Doctor\DoctorQrCodeController;
 use App\Http\Controllers\Lab\LabController;
 use App\Http\Controllers\OtpController;
 use App\Http\Controllers\Paramedic\ParamedicController;
+use App\Http\Controllers\Pharma\PharmaController;
 use App\Http\Controllers\User\MedicalImageAnalysisController;
 use App\Http\Controllers\User\ProfileController;
 use App\Http\Controllers\User\QrCodeController;
@@ -100,6 +101,9 @@ Route::middleware('auth:pharma')->prefix('pharma')->group(function () {
 
     Route::post('/logout', [LoginController::class, 'logout'])->name('api.pharma.logout');
     Route::get('/me', [LoginController::class, 'me'])->name('api.pharma.me');
+    Route::post('/patients/search',             [PharmaController::class, 'searchPatient']);
+    Route::post('/patients/verify',             [PharmaController::class, 'verifyAccess']);
+    Route::post('/prescriptions/{id}/dispense', [PharmaController::class, 'dispense']);
 });
 
 // -------------------------------------------------------
