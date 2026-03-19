@@ -190,9 +190,18 @@ class DoctorController extends Controller
         // ✅ بنحول لـ array في كل الحالات
         $tests = [];
         if ($request->filled('required_tests')) {
-            $tests = is_array($request->required_tests)
-                ? $request->required_tests
-                : array_filter(array_map('trim', explode(',', $request->required_tests)));
+            $raw = $request->required_tests;
+
+            if (is_array($raw)) {
+                // ✅ جاي كـ array عادي
+                $tests = $raw;
+            } elseif (str_starts_with(trim($raw), '[')) {
+                // ✅ جاي كـ JSON string زي '["CBC","X-Ray"]'
+                $tests = json_decode($raw, true) ?? [];
+            } else {
+                // ✅ جاي كـ string عادي زي 'CBC, X-Ray'
+                $tests = array_filter(array_map('trim', explode(',', $raw)));
+            }
         }
 
         $report = DoctorReport::create([
