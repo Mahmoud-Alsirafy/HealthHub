@@ -26,6 +26,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'localeCookieRedirect'    => \Mcamara\LaravelLocalization\Middleware\LocaleCookieRedirect::class,
             'localeViewPath'          => \Mcamara\LaravelLocalization\Middleware\LaravelLocalizationViewPath::class,
             "Otp"                     => \App\Http\Middleware\Otp::class,
+             'admin.type' => \App\Http\Middleware\AdminTypeMiddleware::class,
             $middleware->redirectGuestsTo(fn() => response()->json([
                 'message' => 'Unauthenticated'
             ], 401)),

@@ -11,5 +11,6 @@ class RouteServiceProvider extends ServiceProvider
     public const LAB = '/lab';
     public const PHARAMAS = '/pharma';
     public const PARAMEDICS = '/paramedics';
+    public const ADMINS = '/admins';
 
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Admin;
 use App\Models\User;
 use App\Models\Doctor;
 use App\Models\Lab;
@@ -43,6 +44,7 @@ class OtpController extends Controller
             'labs' => Lab::class,
             'pharmas' => Pharma::class,
             'paramedics' => Paramedic::class,
+            'admins' => Admin::class,
         ];
 
         return $models[$type] ?? null;

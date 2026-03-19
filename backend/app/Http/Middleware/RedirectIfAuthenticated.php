@@ -31,6 +31,9 @@ class RedirectIfAuthenticated
         if (auth('paramedic')->check()) {
             return redirect(RouteServiceProvider::PARAMEDICS);
         }
+        if (auth('admin')->check()) {
+            return redirect(RouteServiceProvider::ADMINS);
+        }
 
         return $next($request);
     }
