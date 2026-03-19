@@ -63,6 +63,10 @@ return [
         'driver'   => 'jwt',
         'provider' => 'paramedics',
     ],
+    'admin' => [
+        'driver'   => 'jwt',
+        'provider' => 'admins',
+    ],
 ],
 
     /*
@@ -102,6 +106,10 @@ return [
     'paramedics' => [
         'driver' => 'eloquent',
         'model'  => App\Models\Paramedic::class, // ✅
+    ],
+    'admins' => [
+        'driver' => 'eloquent',
+        'model'  => App\Models\Admin::class, // ✅
     ],
 ],
     /*

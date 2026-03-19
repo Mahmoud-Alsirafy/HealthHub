@@ -23,6 +23,7 @@ trait AuthTrait
             'labs'       => 'lab',
             'pharmas'    => 'pharma',
             'paramedics' => 'paramedic',
+            'admins' => 'admin',
         ];
 
         return $guards[$request->type] ?? 'api';
@@ -39,6 +40,7 @@ trait AuthTrait
             'labs'       => RouteServiceProvider::LAB,
             'pharmas'    => RouteServiceProvider::PHARAMAS,
             'paramedics' => RouteServiceProvider::PARAMEDICS,
+            'admins' => RouteServiceProvider::ADMINS,
         ];
 
         return redirect()->intended($redirects[$request->type] ?? RouteServiceProvider::USER);
@@ -52,6 +54,7 @@ trait AuthTrait
         'lab'       => \App\Models\Lab::class,
         'pharma'    => \App\Models\Pharma::class,
         'paramedic' => \App\Models\Paramedic::class,
+        'admin' => \App\Models\Admin::class,
     ];
 
     return $models[$guard] ?? \App\Models\User::class;

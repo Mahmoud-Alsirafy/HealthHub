@@ -22,6 +22,6 @@ class DatabaseSeeder extends Seeder
         $this->call(PharmaTable::class);
         $this->call(ParamedicTable::class);
         $this->call(LabTable::class);
-
+        $this->call(AdminTable::class);
     }
 }
