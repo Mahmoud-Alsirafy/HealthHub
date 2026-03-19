@@ -32,7 +32,11 @@ class DoctorReport extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
     public function labReports()
-{
-    return $this->hasMany(LabReport::class, 'report_id');
-}
+    {
+        return $this->hasMany(LabReport::class, 'report_id');
+    }
+    public function prescriptions()
+    {
+        return $this->hasMany(Prescription::class, 'report_id');
+    }
 }

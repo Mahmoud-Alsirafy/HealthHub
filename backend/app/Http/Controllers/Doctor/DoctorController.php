@@ -176,60 +176,81 @@ class DoctorController extends Controller
     // إضافة تقرير طبي
     // -------------------------------------------------------
     public function storeReport(Request $request)
-    {
-        $request->validate([
-            'patient_id'      => 'required|exists:users,id',
-            'diagnosis'       => 'required|string',
-            'notes'           => 'nullable|string',
-            'required_tests'  => 'nullable',
-            'next_visit_date' => 'nullable|date',
-        ]);
+{
+    $request->validate([
+        'patient_id'              => 'required|exists:users,id',
+        'diagnosis'               => 'required|string',
+        'notes'                   => 'nullable|string',
+        'required_tests'          => 'nullable',
+        'next_visit_date'         => 'nullable|date',
+        // ✅ الأدوية
+        'medications'             => 'nullable|array',
+        'medications.*.medication_name' => 'required|string',
+        'medications.*.dosage'          => 'nullable|string',
+        'medications.*.frequency'       => 'nullable|string',
+        'medications.*.duration'        => 'nullable|string',
+        'medications.*.notes'           => 'nullable|string',
+    ]);
 
-        $doctor = Auth::guard('doctor')->user();
+    $doctor = Auth::guard('doctor')->user();
 
-        // ✅ بنحول لـ array في كل الحالات
-        $tests = [];
-        if ($request->filled('required_tests')) {
-            $raw = $request->required_tests;
-
-            if (is_array($raw)) {
-                // ✅ جاي كـ array عادي
-                $tests = $raw;
-            } elseif (str_starts_with(trim($raw), '[')) {
-                // ✅ جاي كـ JSON string زي '["CBC","X-Ray"]'
-                $tests = json_decode($raw, true) ?? [];
-            } else {
-                // ✅ جاي كـ string عادي زي 'CBC, X-Ray'
-                $tests = array_filter(array_map('trim', explode(',', $raw)));
-            }
+    $tests = [];
+    if ($request->filled('required_tests')) {
+        $raw = $request->required_tests;
+        if (is_array($raw)) {
+            $tests = $raw;
+        } elseif (str_starts_with(trim($raw), '[')) {
+            $tests = json_decode($raw, true) ?? [];
+        } else {
+            $tests = array_filter(array_map('trim', explode(',', $raw)));
         }
-
-        $report = DoctorReport::create([
-            'doctor_id'       => $doctor->id,
-            'user_id'         => $request->patient_id,
-            'diagnosis'       => $request->diagnosis,
-            'notes'           => $request->notes,
-            'required_tests'  => !empty($tests) ? implode(', ', $tests) : null,
-            'next_visit_date' => $request->next_visit_date,
-        ]);
-
-        foreach ($tests as $test) {
-            if (!empty($test)) {
-                \App\Models\LabReport::create([
-                    'user_id'   => $request->patient_id,
-                    'lab_id'    => null,
-                    'report_id' => $report->id,
-                    'test_name' => $test,
-                    'status'    => 'pending',
-                ]);
-            }
-        }
-
-        return response()->json([
-            'message' => 'تم حفظ التقرير بنجاح',
-            'report'  => $report->load('patient'),
-        ], 201);
     }
+
+    $report = DoctorReport::create([
+        'doctor_id'       => $doctor->id,
+        'user_id'         => $request->patient_id,
+        'diagnosis'       => $request->diagnosis,
+        'notes'           => $request->notes,
+        'required_tests'  => !empty($tests) ? implode(', ', $tests) : null,
+        'next_visit_date' => $request->next_visit_date,
+    ]);
+
+    // ✅ حفظ التحاليل
+    foreach ($tests as $test) {
+        if (!empty($test)) {
+            \App\Models\LabReport::create([
+                'user_id'   => $request->patient_id,
+                'lab_id'    => null,
+                'report_id' => $report->id,
+                'test_name' => $test,
+                'status'    => 'pending',
+            ]);
+        }
+    }
+
+    // ✅ حفظ الأدوية
+    if ($request->filled('medications')) {
+        foreach ($request->medications as $medication) {
+            \App\Models\Prescription::create([
+                'user_id'         => $request->patient_id,
+                'doctor_id'       => $doctor->id,
+                'report_id'       => $report->id,
+                'medication_name' => $medication['medication_name'],
+                'dosage'          => $medication['dosage']    ?? null,
+                'frequency'       => $medication['frequency'] ?? null,
+                'duration'        => $medication['duration']  ?? null,
+                'notes'           => $medication['notes']     ?? null,
+                'status'          => 'pending',
+            ]);
+        }
+    }
+
+    return response()->json([
+        'message'       => 'تم حفظ التقرير بنجاح',
+        'report'        => $report->load('patient'),
+        'prescriptions' => $report->prescriptions ?? [],
+    ], 201);
+}
 
     // -------------------------------------------------------
     // Helper - تنسيق بيانات المريض
