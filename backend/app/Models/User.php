@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\DoctorReport;
+use App\Models\LabReport;
 use App\Traits\HasOtp;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -60,6 +61,11 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->hasMany(DoctorReport::class);
     }
+
+    public function labReports()
+{
+    return $this->hasMany(LabReport::class);
+}
 
     // -------------------------------------------------------
     // JWT
