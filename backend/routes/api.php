@@ -136,37 +136,35 @@ Route::middleware('auth:api')->prefix('user')->group(function () {
 
 Route::middleware('auth:admin')->prefix('admin')->group(function () {
 
-Route::post('/logout', [LoginController::class, 'logout'])->name('api.paramedic.logout');
-    Route::get('/me', [LoginController::class, 'me'])->name('api.paramedic.me');
-    // ✅ doctor admin بس
     Route::middleware('admin.type:doctor')->group(function () {
-        Route::get   ('/doctors',       [AdminController::class, 'getDoctors']);
-        Route::post  ('/doctors',       [AdminController::class, 'storeDoctor']);
-        Route::put   ('/doctors/{id}',  [AdminController::class, 'updateDoctor']);
-        Route::delete('/doctors/{id}',  [AdminController::class, 'deleteDoctor']);
+        Route::get   ('/doctors',      [AdminController::class, 'getDoctors']);
+        Route::get   ('/doctors/{id}', [AdminController::class, 'showDoctor']);   // ✅
+        Route::post  ('/doctors',      [AdminController::class, 'storeDoctor']);
+        Route::post   ('/doctors/{id}', [AdminController::class, 'updateDoctor']);
+        Route::delete('/doctors/{id}', [AdminController::class, 'deleteDoctor']);
     });
 
-    // ✅ lab admin بس
     Route::middleware('admin.type:lab')->group(function () {
-        Route::get   ('/labs',          [AdminController::class, 'getLabs']);
-        Route::post  ('/labs',          [AdminController::class, 'storeLab']);
-        Route::put   ('/labs/{id}',     [AdminController::class, 'updateLab']);
-        Route::delete('/labs/{id}',     [AdminController::class, 'deleteLab']);
+        Route::get   ('/labs',      [AdminController::class, 'getLabs']);
+        Route::get   ('/labs/{id}', [AdminController::class, 'showLab']);         // ✅
+        Route::post  ('/labs',      [AdminController::class, 'storeLab']);
+        Route::post   ('/labs/{id}', [AdminController::class, 'updateLab']);
+        Route::delete('/labs/{id}', [AdminController::class, 'deleteLab']);
     });
 
-    // ✅ pharma admin بس
     Route::middleware('admin.type:pharma')->group(function () {
-        Route::get   ('/pharmas',       [AdminController::class, 'getPharmas']);
-        Route::post  ('/pharmas',       [AdminController::class, 'storePharma']);
-        Route::put   ('/pharmas/{id}',  [AdminController::class, 'updatePharma']);
-        Route::delete('/pharmas/{id}',  [AdminController::class, 'deletePharma']);
+        Route::get   ('/pharmas',      [AdminController::class, 'getPharmas']);
+        Route::get   ('/pharmas/{id}', [AdminController::class, 'showPharma']);   // ✅
+        Route::post  ('/pharmas',      [AdminController::class, 'storePharma']);
+        Route::post   ('/pharmas/{id}', [AdminController::class, 'updatePharma']);
+        Route::delete('/pharmas/{id}', [AdminController::class, 'deletePharma']);
     });
 
-    // ✅ paramedic admin بس
     Route::middleware('admin.type:paramedic')->group(function () {
         Route::get   ('/paramedics',      [AdminController::class, 'getParamedics']);
+        Route::get   ('/paramedics/{id}', [AdminController::class, 'showParamedic']); // ✅
         Route::post  ('/paramedics',      [AdminController::class, 'storeParamedic']);
-        Route::put   ('/paramedics/{id}', [AdminController::class, 'updateParamedic']);
+        Route::post   ('/paramedics/{id}', [AdminController::class, 'updateParamedic']);
         Route::delete('/paramedics/{id}', [AdminController::class, 'deleteParamedic']);
     });
 
