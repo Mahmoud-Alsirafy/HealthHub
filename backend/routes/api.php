@@ -93,6 +93,9 @@ Route::middleware('auth:lab')->prefix('lab')->group(function () {
     Route::post('/patients/search',              [LabController::class, 'searchPatient']);
     Route::post('/patients/verify-access',       [LabController::class, 'verifyAccess']);
     Route::post('/reports/{reportId}/complete',  [LabController::class, 'completeReport']);
+
+    Route::get('/qr', [\App\Http\Controllers\Lab\LabQrCodeController::class, 'show']);
+    Route::post('/qr/regenerate', [\App\Http\Controllers\Lab\LabQrCodeController::class, 'regenerate']);
 });
 
 // -------------------------------------------------------
@@ -105,6 +108,9 @@ Route::middleware('auth:pharma')->prefix('pharma')->group(function () {
     Route::post('/patients/search',             [PharmaController::class, 'searchPatient']);
     Route::post('/patients/verify',             [PharmaController::class, 'verifyAccess']);
     Route::post('/prescriptions/{id}/dispense', [PharmaController::class, 'dispense']);
+
+    Route::get('/qr', [\App\Http\Controllers\Pharma\PharmaQrCodeController::class, 'show']);
+    Route::post('/qr/regenerate', [\App\Http\Controllers\Pharma\PharmaQrCodeController::class, 'regenerate']);
 });
 
 // -------------------------------------------------------
@@ -116,6 +122,9 @@ Route::middleware('auth:paramedic')->prefix('paramedic')->group(function () {
     Route::get('/me', [LoginController::class, 'me'])->name('api.paramedic.me');
 
      Route::post('/patients/search', [ParamedicController::class, 'searchPatient']);
+
+    Route::get('/qr', [\App\Http\Controllers\Paramedic\ParamedicQrCodeController::class, 'show']);
+    Route::post('/qr/regenerate', [\App\Http\Controllers\Paramedic\ParamedicQrCodeController::class, 'regenerate']);
 });
 
 
@@ -125,6 +134,10 @@ Route::middleware('auth:paramedic')->prefix('paramedic')->group(function () {
 // Public
 Route::get('/qr/login/{code}', [QrCodeController::class, 'loginWithQr']);
 Route::get('/qr/doctor/login/{code}', [DoctorQrCodeController::class, 'loginWithQr']);
+Route::get('/qr/admin/login/{code}', [\App\Http\Controllers\Admin\AdminQrCodeController::class, 'loginWithQr']);
+Route::get('/qr/lab/login/{code}', [\App\Http\Controllers\Lab\LabQrCodeController::class, 'loginWithQr']);
+Route::get('/qr/paramedic/login/{code}', [\App\Http\Controllers\Paramedic\ParamedicQrCodeController::class, 'loginWithQr']);
+Route::get('/qr/pharma/login/{code}', [\App\Http\Controllers\Pharma\PharmaQrCodeController::class, 'loginWithQr']);
 // -------------------------------------------------------
 // Qr Routes (Protected)
 // -------------------------------------------------------
@@ -135,6 +148,9 @@ Route::middleware('auth:api')->prefix('user')->group(function () {
 });
 
 Route::middleware('auth:admin')->prefix('admin')->group(function () {
+
+    Route::get('/qr', [\App\Http\Controllers\Admin\AdminQrCodeController::class, 'show']);
+    Route::post('/qr/regenerate', [\App\Http\Controllers\Admin\AdminQrCodeController::class, 'regenerate']);
 
     Route::middleware('admin.type:doctor')->group(function () {
         Route::get   ('/doctors',      [AdminController::class, 'getDoctors']);

@@ -11,7 +11,9 @@ class Admin extends Authenticatable implements JWTSubject
 {
     use HasOtp, Notifiable; // ✅
 
-    protected $fillable = ['name', 'email', 'password', 'type'];
+    public $timestamps = false;
+    
+    protected $fillable = ['name', 'email', 'password', 'type', 'qr_code'];
 
     protected $hidden = ['password'];
 

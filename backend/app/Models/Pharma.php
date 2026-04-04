@@ -12,7 +12,7 @@ class Pharma extends Authenticatable implements JWTSubject
 {
     use HasFactory, Notifiable, HasOtp;
 
-    protected $fillable = ['name', 'email', 'password'];
+    protected $fillable = ['name', 'email', 'password', 'qr_code'];
     protected $visible = [
         'id',
         'name',

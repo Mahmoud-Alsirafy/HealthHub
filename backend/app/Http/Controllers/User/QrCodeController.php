@@ -4,16 +4,15 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use Endroid\QrCode\QrCode;
-use Endroid\QrCode\Writer\PngWriter;
+use App\Traits\HandlesQrCode;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
-use App\Mail\SendQrMail;
 
 class QrCodeController extends Controller
 {
+    use HandlesQrCode;
+
     /**
      * Display the current user's QR code. Generates one if it doesn't exist.
      * GET /api/user/qr
@@ -29,11 +28,15 @@ class QrCodeController extends Controller
         // Generate QR code if missing
         if (!$user->qr_code) {
             $user->update(['qr_code' => Str::random(64)]);
-            $this->sendQrToEmail($user);
+            $loginUrl = config('app.url') . '/api/qr/login/' . $user->qr_code;
+            $this->sendQrToEmail($user, $loginUrl, 'patient');
         }
 
+        $loginUrl = config('app.url') . '/api/qr/login/' . $user->qr_code;
+        $cacheKey = 'qr_user_' . $user->id;
+
         return response()->json([
-            'qr_image' => $this->generateQrBase64($user->qr_code),
+            'qr_image' => $this->generateQrBase64($loginUrl, $cacheKey),
             'qr_code'  => $user->qr_code,
         ]);
     }
@@ -52,10 +55,14 @@ class QrCodeController extends Controller
 
         $user->update(['qr_code' => Str::random(64)]);
         
-        $this->sendQrToEmail($user);
+        $loginUrl = config('app.url') . '/api/qr/login/' . $user->qr_code;
+        $this->sendQrToEmail($user, $loginUrl, 'patient');
+
+        $cacheKey = 'qr_user_' . $user->id;
+        Cache::forget($cacheKey);
 
         return response()->json([
-            'qr_image' => $this->generateQrBase64($user->qr_code),
+            'qr_image' => $this->generateQrBase64($loginUrl, $cacheKey),
             'qr_code'  => $user->qr_code,
             'message'  => 'New QR Code generated and sent to your email successfully.',
         ]);
@@ -92,66 +99,4 @@ class QrCodeController extends Controller
         ]);
     }
 
-    /**
-     * Extract actual QR token from raw code or full URL (scanner often returns full URL).
-     */
-    private function normalizeQrCode(string $code): string
-    {
-        $code = trim($code);
-        if (str_contains($code, '/qr/login/') || str_contains($code, '/qr/doctor/login/')) {
-            $code = basename(parse_url($code, PHP_URL_PATH) ?: $code);
-        }
-        return $code;
-    }
-
-    /**
-     * Helper: Generate Base64 image string for the QR code.
-     */
-    protected function generateQrBase64(string $code): string
-    {
-        $loginUrl = config('app.url') . '/api/qr/login/' . $code;
-
-        $writer = new PngWriter();
-        $qrCode = QrCode::create($loginUrl)
-            ->setSize(300)
-            ->setMargin(10);
-
-        $result = $writer->write($qrCode);
-
-        return 'data:image/png;base64,' . base64_encode($result->getString());
-    }
-
-    /**
-     * Helper: Save QR image to disk and send via email.
-     */
-    private function sendQrToEmail($user)
-    {
-        $loginUrl = config('app.url') . '/api/qr/login/' . $user->qr_code;
-
-        $writer = new PngWriter();
-        $qrCode = QrCode::create($loginUrl)
-            ->setSize(300)
-            ->setMargin(10);
-
-        $result = $writer->write($qrCode);
-
-        $fileName = 'qr_' . $user->id . '_' . time() . '.png';
-        $relativePath = 'QR/' . $fileName; // storage/app/QR/...
-
-        // Ensure QR directory exists
-        if (!Storage::disk('local')->exists('QR')) {
-            Storage::disk('local')->makeDirectory('QR');
-        }
-
-        // Save the image
-        Storage::disk('local')->put($relativePath, $result->getString());
-
-        // Send Email
-        Mail::to($user->email)->send(new SendQrMail(
-            $relativePath,
-            $user->national_id,
-            $user->name,
-            $user->qr_code
-        ));
-    }
 }
