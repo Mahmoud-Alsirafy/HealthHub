@@ -7,24 +7,28 @@ use App\Models\Prescription;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use App\Traits\HandlesQrCode;
 
 class PharmaController extends Controller
 {
+    use HandlesQrCode;
     public function searchPatient(Request $request)
     {
         $request->validate(['search' => 'required|string']);
 
         $pharma = auth('pharma')->user();
 
+        $search = $this->normalizeQrCode($request->search);
+
         // ✅ QR → فوري بدون OTP
-        $patient = User::where('qr_code', $request->search)->first();
+        $patient = User::where('qr_code', $search)->first();
 
         if ($patient) {
             return $this->patientWithPrescriptions($patient);
         }
 
         // ✅ National ID → OTP
-        $patient = User::where('national_id', $request->search)->first();
+        $patient = User::where('national_id', $search)->first();
 
         if (!$patient) {
             return response()->json([
@@ -94,6 +98,22 @@ class PharmaController extends Controller
         ]);
     }
 
+    public function cancel(Request $request, int $prescriptionId)
+    {
+        $prescription = Prescription::where('id', $prescriptionId)
+            ->where('status', 'pending')
+            ->firstOrFail();
+
+        $prescription->update([
+            'status' => 'cancelled',
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Prescription marked as cancelled.',
+        ]);
+    }
+
     private function patientWithPrescriptions(User $patient)
     {
         $prescriptions = Prescription::where('user_id', $patient->id)
@@ -121,6 +141,26 @@ class PharmaController extends Controller
                 'national_id' => $patient->national_id,
             ],
             'prescriptions' => $prescriptions,
+        ]);
+    }
+
+    public function stats()
+    {
+        $pharma = auth('pharma')->user();
+
+        $totalDispensed = Prescription::where('pharmacy_id', $pharma->id)->count();
+        $uniquePatientsServed = Prescription::where('pharmacy_id', $pharma->id)->distinct('user_id')->count();
+        $totalSystemUsers = User::count();
+
+        return response()->json([
+            'success'   => true,
+            'pharma_name' => $pharma->name,
+            'stats' => [
+                'total_dispensed'       => $totalDispensed,
+                'unique_patients'       => $uniquePatientsServed,
+                'total_searched'        => $totalSystemUsers,
+                'total_system_patients' => $totalSystemUsers,
+            ]
         ]);
     }
 }

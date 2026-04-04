@@ -312,3 +312,152 @@ export async function analyzeMedicalImageApi(token: string, data: { folder: stri
   })
   return response.json()
 }
+
+// -------------------------------------------------------
+// Pharma Dashboard APIs
+// -------------------------------------------------------
+
+export async function getPharmaStatsApi(token: string) {
+  const response = await fetch(`${API_BASE_URL}/pharma/stats`, {
+    method: "GET",
+    headers: {
+      "Accept": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+  });
+  return response.json();
+}
+
+export async function searchPharmaPatientApi(token: string, search: string) {
+  const response = await fetch(`${API_BASE_URL}/pharma/patients/search`, {
+    method: "POST",
+    headers: {
+      "Accept": "application/json",
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+    body: JSON.stringify({ search }),
+  });
+  return response.json();
+}
+
+export async function verifyPharmaAccessApi(token: string, data: { patient_id: number, otp: string }) {
+  const response = await fetch(`${API_BASE_URL}/pharma/patients/verify`, {
+    method: "POST",
+    headers: {
+      "Accept": "application/json",
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+    body: JSON.stringify(data),
+  });
+  return response.json();
+}
+
+export async function dispensePrescriptionApi(token: string, prescriptionId: number) {
+  const response = await fetch(`${API_BASE_URL}/pharma/prescriptions/${prescriptionId}/dispense`, {
+    method: "POST",
+    headers: {
+      "Accept": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+  });
+  return response.json();
+}
+
+export async function cancelPrescriptionApi(token: string, prescriptionId: number) {
+  const response = await fetch(`${API_BASE_URL}/pharma/prescriptions/${prescriptionId}/cancel`, {
+    method: "POST",
+    headers: {
+      "Accept": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+  });
+  return response.json();
+}
+
+export async function getPharmaQrApi(token: string) {
+  const response = await fetch(`${API_BASE_URL}/pharma/qr`, {
+    method: "GET",
+    headers: {
+      "Accept": "application/json",
+      "Authorization": `Bearer ${token}`,
+    },
+  });
+  return response.json();
+}
+
+export async function regeneratePharmaQrApi(token: string) {
+  const response = await fetch(`${API_BASE_URL}/pharma/qr/regenerate`, {
+    method: "POST",
+    headers: {
+      "Accept": "application/json",
+      "Authorization": `Bearer ${token}`,
+    },
+  });
+  return response.json();
+}
+
+// -------------------------------------------------------
+// Lab Dashboard APIs
+// -------------------------------------------------------
+
+export async function searchLabPatientApi(token: string, search: string) {
+  const response = await fetch(`${API_BASE_URL}/lab/patients/search`, {
+    method: "POST",
+    headers: {
+      "Accept": "application/json",
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+    body: JSON.stringify({ search }),
+  });
+  return response.json();
+}
+
+export async function verifyLabAccessApi(token: string, data: { patient_id: number, otp: string }) {
+  const response = await fetch(`${API_BASE_URL}/lab/patients/verify-access`, {
+    method: "POST",
+    headers: {
+      "Accept": "application/json",
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+    body: JSON.stringify(data),
+  });
+  return response.json();
+}
+
+export async function completeLabReportApi(token: string, reportId: number, formData: FormData) {
+  const response = await fetch(`${API_BASE_URL}/lab/reports/${reportId}/complete`, {
+    method: "POST",
+    headers: {
+      "Accept": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+    body: formData,
+  });
+  return response.json();
+}
+
+export async function getLabQrApi(token: string) {
+  const response = await fetch(`${API_BASE_URL}/lab/qr`, {
+    method: "GET",
+    headers: {
+      "Accept": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+  });
+  return response.json();
+}
+
+export async function regenerateLabQrApi(token: string) {
+  const response = await fetch(`${API_BASE_URL}/lab/qr/regenerate`, {
+    method: "POST",
+    headers: {
+      "Accept": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+  });
+  return response.json();
+}

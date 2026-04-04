@@ -189,7 +189,11 @@ function LoginForm() {
 
           if (userType === "doctors") {
             router.push("/dashboard/doctor");
-          } else if (userType === "pharmas" || userType === "laps" || userType === "paramedics") {
+          } else if (userType === "pharmas") {
+            router.push("/dashboard/pharma");
+          } else if (userType === "labs") {
+            router.push("/dashboard/lab");
+          } else if (userType === "paramedics") {
             router.push("/dashboard/facility");
           } else {
             router.push("/dashboard/patient");
@@ -227,23 +231,41 @@ function LoginForm() {
     });
   };
 
-  // ✅ QR Login Handler – scanner may return full URL or raw code; support user & doctor endpoints
+    // ✅ QR Login Handler – scanner may return full URL or raw code; support all roles
   const handleQrLogin = async (decodedText: string) => {
     setError(null);
     const base = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api";
     const trimmed = decodedText.trim();
-    const isDoctorQr = trimmed.includes("/qr/doctor/login");
-    const isUserQr = trimmed.includes("/qr/login");
-    let code = trimmed;
-    if (isDoctorQr || isUserQr) {
-      try {
-        const url = new URL(trimmed.startsWith("http") ? trimmed : "http://dummy/" + trimmed);
-        code = url.pathname.split("/").filter(Boolean).pop() || trimmed;
-      } catch {
-        code = trimmed.split("/").filter(Boolean).pop() || trimmed;
+    
+    // Check which role this QR belongs to
+    const patterns = [
+      "/qr/doctor/login/",
+      "/qr/admin/login/", 
+      "/qr/lab/login/",
+      "/qr/paramedic/login/",
+      "/qr/pharma/login/",
+      "/qr/login/"
+    ];
+    
+    let matchedPath = "/qr/login/";
+    for (const p of patterns) {
+      if (trimmed.includes(p)) {
+        matchedPath = p;
+        break;
       }
     }
-    const endpoint = isDoctorQr ? `${base}/qr/doctor/login/${encodeURIComponent(code)}` : `${base}/qr/login/${encodeURIComponent(code)}`;
+    
+    let code = trimmed;
+    try {
+      const url = new URL(trimmed.startsWith("http") ? trimmed : "http://dummy/" + trimmed);
+      code = url.pathname.split("/").filter(Boolean).pop() || trimmed;
+    } catch {
+      code = trimmed.split("/").filter(Boolean).pop() || trimmed;
+    }
+
+    // matchedPath already includes leading/trailing slashes, remove trailing for the base join
+    const cleanPath = matchedPath.endsWith('/') ? matchedPath.slice(0, -1) : matchedPath;
+    const endpoint = `${base}${cleanPath}/${encodeURIComponent(code)}`;
 
     startTransition(async () => {
       try {
@@ -258,7 +280,11 @@ function LoginForm() {
 
           if (res.type === "doctors" || res.type === "doctor") {
             router.push("/dashboard/doctor");
-          } else if (res.type === "pharmas" || res.type === "laps" || res.type === "paramedics") {
+          } else if (res.type === "pharmas") {
+            router.push("/dashboard/pharma");
+          } else if (res.type === "labs") {
+            router.push("/dashboard/lab");
+          } else if (res.type === "paramedics") {
             router.push("/dashboard/facility");
           } else {
             router.push("/dashboard/patient");
@@ -513,7 +539,7 @@ function LoginForm() {
                         <SelectContent>
                           <SelectItem value="users">Patient</SelectItem>
                           <SelectItem value="doctors">Doctor</SelectItem>
-                          <SelectItem value="laps">Lab</SelectItem>
+                          <SelectItem value="labs">Lab</SelectItem>
                           <SelectItem value="paramedics">Paramedic</SelectItem>
                           <SelectItem value="pharmas">Pharmacy</SelectItem>
                         </SelectContent>

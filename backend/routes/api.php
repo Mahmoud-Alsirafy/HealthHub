@@ -105,9 +105,11 @@ Route::middleware('auth:pharma')->prefix('pharma')->group(function () {
 
     Route::post('/logout', [LoginController::class, 'logout'])->name('api.pharma.logout');
     Route::get('/me', [LoginController::class, 'me'])->name('api.pharma.me');
+    Route::get('/stats',                        [PharmaController::class, 'stats']);
     Route::post('/patients/search',             [PharmaController::class, 'searchPatient']);
     Route::post('/patients/verify',             [PharmaController::class, 'verifyAccess']);
     Route::post('/prescriptions/{id}/dispense', [PharmaController::class, 'dispense']);
+    Route::post('/prescriptions/{id}/cancel',   [PharmaController::class, 'cancel']);
 
     Route::get('/qr', [\App\Http\Controllers\Pharma\PharmaQrCodeController::class, 'show']);
     Route::post('/qr/regenerate', [\App\Http\Controllers\Pharma\PharmaQrCodeController::class, 'regenerate']);
