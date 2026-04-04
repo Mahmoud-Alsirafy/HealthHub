@@ -77,6 +77,7 @@ export function DoctorDashboardContent() {
   const [notes, setNotes] = useState("")
   const [requiredTests, setRequiredTests] = useState("")
   const [nextVisit, setNextVisit] = useState("")
+  const [medications, setMedications] = useState<any[]>([])
 
   // QR Code (generate / regenerate like patient dashboard)
   const [qrImage, setQrImage] = useState<string | null>(null)
@@ -308,6 +309,20 @@ export function DoctorDashboardContent() {
     })
   }
 
+  const handleAddMedication = () => {
+    setMedications([...medications, { medication_name: "", dosage: "", frequency: "", duration: "", notes: "" }])
+  }
+
+  const handleUpdateMedication = (index: number, field: string, value: string) => {
+    const updated = [...medications]
+    updated[index] = { ...updated[index], [field]: value }
+    setMedications(updated)
+  }
+
+  const handleRemoveMedication = (index: number) => {
+    setMedications(medications.filter((_, i) => i !== index))
+  }
+
   const handleSubmitReport = () => {
     if (!reportPatientId || !diagnosis || !token) {
       toast.error("Please fill in required fields")
@@ -322,6 +337,7 @@ export function DoctorDashboardContent() {
           notes,
           required_tests: requiredTests,
           next_visit_date: nextVisit,
+          medications: medications,
         })
 
         if (res.report) {
@@ -330,6 +346,7 @@ export function DoctorDashboardContent() {
           setNotes("")
           setRequiredTests("")
           setNextVisit("")
+          setMedications([])
 
           const profileRes = await getDoctorMeApi(token)
           if (profileRes.stats) setStats(profileRes.stats)
@@ -841,14 +858,81 @@ export function DoctorDashboardContent() {
                     </div>
                   </div>
 
-                  <Button
-                    className="w-full h-14 rounded-xl font-bold text-base shadow-xl shadow-primary/20"
-                    onClick={handleSubmitReport}
-                    disabled={isPending || !selectedPatient || !diagnosis}
-                  >
-                    {isPending ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Plus className="mr-2 h-5 w-5" />}
-                    Save Clinical Report
-                  </Button>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <Label className="text-xs font-bold uppercase text-muted-foreground flex items-center gap-2">
+                          <Pill className="h-4 w-4" /> Prescribed Medications
+                        </Label>
+                        <Button type="button" variant="outline" size="sm" className="h-8 rounded-lg" onClick={handleAddMedication}>
+                          <Plus className="mr-2 h-3.5 w-3.5" /> Add Medication
+                        </Button>
+                      </div>
+
+                      {medications.length > 0 ? (
+                        <div className="space-y-3 p-1">
+                          {medications.map((med, index) => (
+                            <div key={index} className="p-4 bg-muted/30 rounded-xl border border-border/50 relative space-y-3 group">
+                              <button
+                                type="button"
+                                className="absolute top-2 right-2 h-6 w-6 rounded-full bg-destructive/10 text-destructive flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                onClick={() => handleRemoveMedication(index)}
+                              >
+                                <X className="h-3 w-3" />
+                              </button>
+
+                              <div className="grid grid-cols-1 gap-3">
+                                <Input
+                                  placeholder="Medication Name (e.g., Amoxicillin)"
+                                  className="h-10 rounded-lg bg-background"
+                                  value={med.medication_name}
+                                  onChange={(e) => handleUpdateMedication(index, 'medication_name', e.target.value)}
+                                />
+                                <div className="grid grid-cols-2 gap-2">
+                                  <Input
+                                    placeholder="Dosage (500mg)"
+                                    className="h-9 rounded-lg bg-background text-sm"
+                                    value={med.dosage}
+                                    onChange={(e) => handleUpdateMedication(index, 'dosage', e.target.value)}
+                                  />
+                                  <Input
+                                    placeholder="Freq (3x daily)"
+                                    className="h-9 rounded-lg bg-background text-sm"
+                                    value={med.frequency}
+                                    onChange={(e) => handleUpdateMedication(index, 'frequency', e.target.value)}
+                                  />
+                                </div>
+                                <Input
+                                  placeholder="Duration (7 days)"
+                                  className="h-9 rounded-lg bg-background text-sm"
+                                  value={med.duration}
+                                  onChange={(e) => handleUpdateMedication(index, 'duration', e.target.value)}
+                                />
+                                <Textarea
+                                  placeholder="Special instructions for the pharmacist..."
+                                  className="min-h-[60px] rounded-lg bg-background text-sm"
+                                  value={med.notes}
+                                  onChange={(e) => handleUpdateMedication(index, 'notes', e.target.value)}
+                                />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="p-8 text-center bg-muted/10 rounded-xl border border-dashed border-border flex flex-col items-center gap-2 opacity-60">
+                           <Pill className="h-6 w-6 opacity-20" />
+                           <p className="text-xs">No medications added yet.</p>
+                        </div>
+                      )}
+                    </div>
+
+                    <Button
+                      className="w-full h-14 rounded-xl font-bold text-base shadow-xl shadow-primary/20"
+                      onClick={handleSubmitReport}
+                      disabled={isPending || !selectedPatient || !diagnosis}
+                    >
+                      {isPending ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Plus className="mr-2 h-5 w-5" />}
+                      Save Clinical Report
+                    </Button>
                 </CardContent>
               </Card>
             </div>
