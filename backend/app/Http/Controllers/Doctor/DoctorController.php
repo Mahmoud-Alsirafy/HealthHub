@@ -257,11 +257,32 @@ class DoctorController extends Controller
     // -------------------------------------------------------
     private function formatPatient(User $patient): array
     {
+        // ✅ Merge profile images and lab report images
+        $profile = $patient->profile;
+        $allImages = collect();
+
+        if ($profile) {
+            foreach ($profile->images as $img) {
+                $allImages->push($img);
+            }
+        }
+
+        $labReports = \App\Models\LabReport::where('user_id', $patient->id)->with('images')->latest()->get();
+        foreach ($labReports as $report) {
+            foreach ($report->images as $img) {
+                if (!$img->title) $img->title = "Lab Result: " . $report->test_name;
+                if (!$img->type) $img->type = "lab_result";
+                // Add a custom property to help frontend identify the folder
+                $img->folder = "lab_result";
+                $allImages->push($img);
+            }
+        }
+
         return [
             'id'          => $patient->id,
             'name'        => $patient->name,
             'national_id' => $patient->national_id,
-            'profile'     => $patient->profile,
+            'profile'     => $profile ? array_merge($profile->toArray(), ['images' => $allImages->values()]) : null,
             'reports'     => $patient->doctorReports->map(fn($r) => [
                 'id'              => $r->id,
                 'diagnosis'       => $r->diagnosis,

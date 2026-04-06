@@ -754,7 +754,9 @@ export function DoctorDashboardContent() {
                               <div key={img.id} className="group relative aspect-video rounded-xl border bg-muted overflow-hidden shadow-sm hover:shadow-md transition-all">
                                 {img.filename.match(/\.(jpg|jpeg|png|webp)$/i) ? (
                                   <img
-                                    src={`${API_BASE_URL.replace('/api', '')}/attachments/PatientProfile/${selectedPatient.profile.id}/${img.filename}`}
+                                    src={`${API_BASE_URL.replace('/api', '')}/attachments/${selectedPatient.id}/${
+                                      img.imageable_type?.includes('LabReport') || img.type === 'lab_result' ? 'lab_result' : 'PatientProfile'
+                                    }/${img.filename}`}
                                     className="h-full w-full object-cover"
                                     alt={img.title}
                                   />
@@ -770,7 +772,9 @@ export function DoctorDashboardContent() {
                                     size="sm"
                                     variant="secondary"
                                     className="h-7 text-[10px] font-bold rounded-lg w-full"
-                                    onClick={() => window.open(`${API_BASE_URL.replace('/api', '')}/attachments/PatientProfile/${selectedPatient.profile.id}/${img.filename}`, '_blank')}
+                                    onClick={() => window.open(`${API_BASE_URL.replace('/api', '')}/attachments/${selectedPatient.id}/${
+                                      img.imageable_type?.includes('LabReport') || img.type === 'lab_result' ? 'lab_result' : 'PatientProfile'
+                                    }/${img.filename}`, '_blank')}
                                   >
                                     View Document
                                   </Button>
