@@ -233,7 +233,10 @@ export default function PatientDashboardContent() {
 
   const getFileUrl = (file: any) => {
     const baseUrl = API_BASE_URL.replace('/api', '')
-    return `${baseUrl}/attachments/PatientProfile/${profile?.profile?.id}/${file.filename}`
+    // Accurate folder detection based on the model the image is attached to
+    const folder = file.imageable_type?.includes('LabReport') ? "lab_result" : "PatientProfile"
+    const userId = profile?.id
+    return `${baseUrl}/attachments/${userId}/${folder}/${file.filename}`
   }
 
   const upcomingAppointments = appointments.filter((a) => {
