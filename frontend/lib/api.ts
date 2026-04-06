@@ -317,6 +317,17 @@ export async function analyzeMedicalImageApi(token: string, data: { folder: stri
 // Pharma Dashboard APIs
 // -------------------------------------------------------
 
+export async function getPharmaMeApi(token: string) {
+  const response = await fetch(`${API_BASE_URL}/pharma/me`, {
+    method: "GET",
+    headers: {
+      "Accept": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+  });
+  return response.json();
+}
+
 export async function getPharmaStatsApi(token: string) {
   const response = await fetch(`${API_BASE_URL}/pharma/stats`, {
     method: "GET",
@@ -401,6 +412,17 @@ export async function regeneratePharmaQrApi(token: string) {
 // -------------------------------------------------------
 // Lab Dashboard APIs
 // -------------------------------------------------------
+
+export async function getLabMeApi(token: string) {
+  const response = await fetch(`${API_BASE_URL}/lab/me`, {
+    method: "GET",
+    headers: {
+      "Accept": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+  });
+  return response.json();
+}
 
 export async function searchLabPatientApi(token: string, search: string) {
   const response = await fetch(`${API_BASE_URL}/lab/patients/search`, {

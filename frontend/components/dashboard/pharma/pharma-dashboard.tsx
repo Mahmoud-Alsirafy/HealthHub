@@ -32,6 +32,7 @@ import {
   cancelPrescriptionApi,
   getPharmaQrApi,
   regeneratePharmaQrApi,
+  getPharmaMeApi,
   API_BASE_URL,
 } from "@/lib/api"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -88,9 +89,13 @@ export function PharmaDashboardContent() {
       try {
         const statsRes = await getPharmaStatsApi(token)
         if (statsRes.success) {
-          setProfile({ name: statsRes.pharma_name })
           setStats(statsRes.stats)
           setRecentSearches(statsRes.recent_searches || [])
+        }
+
+        const meRes = await getPharmaMeApi(token)
+        if (meRes.user) {
+          setProfile(meRes.user)
         }
 
         const qrRes = await getPharmaQrApi(token)
