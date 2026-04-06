@@ -187,6 +187,17 @@ export async function getAppointmentsApi(token: string) {
   return response.json();
 }
 
+export async function getPrescriptionsApi(token: string) {
+  const response = await fetch(`${API_BASE_URL}/user/prescriptions`, {
+    method: "GET",
+    headers: {
+      "Accept": "application/json",
+      "Authorization": `Bearer ${token}`,
+    },
+  });
+  return response.json();
+}
+
 // -------------------------------------------------------
 // Doctor Dashboard APIs
 // -------------------------------------------------------

@@ -19,7 +19,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   getProfileApi, updateBasicProfileApi, updatePatientProfileApi,
   getFilesApi, uploadFileApi, deleteFileApi, getQrApi, regenerateQrApi,
-  API_BASE_URL, getAppointmentsApi, analyzeMedicalImageApi,
+  API_BASE_URL, getAppointmentsApi, getPrescriptionsApi, analyzeMedicalImageApi,
 } from "@/lib/api"
 import ReactMarkdown from "react-markdown"
 import { useToast } from "@/hooks/use-toast"
@@ -32,6 +32,7 @@ export default function PatientDashboardContent() {
   const [profile, setProfile] = useState<any>(null)
   const [files, setFiles] = useState<any[]>([])
   const [appointments, setAppointments] = useState<any[]>([])
+  const [prescriptions, setPrescriptions] = useState<any[]>([])
   const [qrImage, setQrImage] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState("overview")
 
@@ -111,6 +112,8 @@ export default function PatientDashboardContent() {
       if (qrData.qr_image) setQrImage(qrData.qr_image)
       const appointmentsData = await getAppointmentsApi(token)
       if (appointmentsData.appointments) setAppointments(appointmentsData.appointments)
+      const prescriptionsData = await getPrescriptionsApi(token)
+      if (prescriptionsData.prescriptions) setPrescriptions(prescriptionsData.prescriptions)
     } finally {
       setFetching(false)
     }
@@ -262,6 +265,11 @@ export default function PatientDashboardContent() {
       onClick: () => setActiveTab("appointments"), isActive: activeTab === "appointments",
     },
     { title: "QR Code", icon: QrIcon, onClick: () => setActiveTab("qr"), isActive: activeTab === "qr" },
+    {
+      title: "Prescriptions", icon: Sparkles,
+      badge: prescriptions.length ? String(prescriptions.length) : undefined,
+      onClick: () => setActiveTab("prescriptions"), isActive: activeTab === "prescriptions",
+    },
     { title: "Profile", icon: UserIcon, onClick: () => setActiveTab("settings"), isActive: activeTab === "settings" },
   ]
 
@@ -302,9 +310,10 @@ export default function PatientDashboardContent() {
           </div>
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-2 lg:w-fit lg:grid-cols-5 h-auto lg:h-10">
+            <TabsList className="grid w-full grid-cols-2 lg:w-fit lg:grid-cols-6 h-auto lg:h-10">
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="records">Medical Records</TabsTrigger>
+              <TabsTrigger value="prescriptions" className="hidden lg:inline-flex">Prescriptions</TabsTrigger>
               <TabsTrigger value="settings">Profile Settings</TabsTrigger>
               <TabsTrigger value="appointments" className="hidden lg:inline-flex">Appointments</TabsTrigger>
               <TabsTrigger value="qr" className="hidden lg:inline-flex">QR Code</TabsTrigger>
@@ -398,6 +407,77 @@ export default function PatientDashboardContent() {
                     </div>
                   </div>
                 </div>
+              </div>
+            </TabsContent>
+
+            {/* ── PRESCRIPTIONS ── */}
+            <TabsContent value="prescriptions" className="mt-4">
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-xl font-bold text-foreground">Medical Prescriptions</h2>
+                  <Badge variant="outline" className="text-indigo-500 border-indigo-500/20 bg-indigo-500/5 px-3 py-1">
+                    {prescriptions.length} Records Found
+                  </Badge>
+                </div>
+
+                {prescriptions.length === 0 ? (
+                  <Card className="border-2 border-dashed bg-muted/20">
+                    <CardContent className="py-16 text-center space-y-4">
+                      <Sparkles className="h-12 w-12 mx-auto text-indigo-500/20" />
+                      <div className="space-y-1">
+                        <p className="text-lg font-bold">No active prescriptions</p>
+                        <p className="text-sm text-muted-foreground">Digital prescriptions issued by your doctors will appear here.</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {prescriptions.map((p) => (
+                      <Card key={p.id} className="rounded-2xl border-indigo-500/10 shadow-sm hover:shadow-md transition-all overflow-hidden">
+                        <div className="h-2 bg-indigo-500/10" />
+                        <CardContent className="p-6">
+                          <div className="flex justify-between items-start mb-4">
+                            <div>
+                              <h4 className="text-lg font-bold text-indigo-900">{p.medication_name}</h4>
+                              <p className="text-xs text-muted-foreground mt-1">Prescribed on {p.date}</p>
+                            </div>
+                            <Badge className={p.status === 'dispensed' ? 'bg-emerald-500' : 'bg-amber-500'}>
+                              {p.status}
+                            </Badge>
+                          </div>
+
+                          <div className="grid grid-cols-1 gap-3 py-4 border-y border-indigo-500/5 my-4">
+                            <div className="flex items-center justify-between text-sm">
+                              <span className="text-indigo-600/70 font-medium">Dosage:</span>
+                              <span className="font-bold text-indigo-900">{p.dosage}</span>
+                            </div>
+                            <div className="flex items-center justify-between text-sm">
+                              <span className="text-indigo-600/70 font-medium">Frequency:</span>
+                              <span className="font-bold text-indigo-900">{p.frequency}</span>
+                            </div>
+                            <div className="flex items-center justify-between text-sm">
+                              <span className="text-indigo-600/70 font-medium">Duration:</span>
+                              <span className="font-bold text-indigo-900">{p.duration || "As needed"}</span>
+                            </div>
+                          </div>
+
+                          <div className="space-y-2">
+                             <div className="flex items-center justify-between text-[11px]">
+                                <span className="text-muted-foreground italic">Prescribed by</span>
+                                <span className="font-bold text-foreground">Dr. {p.doctor_name}</span>
+                             </div>
+                             {p.pharma_name && (
+                               <div className="flex items-center justify-between text-[11px]">
+                                  <span className="text-muted-foreground italic">Dispensed at</span>
+                                  <span className="font-bold text-foreground">{p.pharma_name}</span>
+                               </div>
+                             )}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
               </div>
             </TabsContent>
 

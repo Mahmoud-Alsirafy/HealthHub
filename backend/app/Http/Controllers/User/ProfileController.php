@@ -233,4 +233,33 @@ class ProfileController extends Controller
             'appointments' => $appointments,
         ]);
     }
+
+    public function prescriptions()
+    {
+        $userId = Auth::guard('api')->id();
+
+        $prescriptions = \App\Models\Prescription::with(['doctor', 'pharma'])
+            ->where('user_id', $userId)
+            ->latest()
+            ->get()
+            ->map(function ($p) {
+                return [
+                    'id'              => $p->id,
+                    'medication_name' => $p->medication_name,
+                    'dosage'          => $p->dosage,
+                    'frequency'       => $p->frequency,
+                    'duration'        => $p->duration,
+                    'notes'           => $p->notes,
+                    'status'          => $p->status,
+                    'pharma_name'     => $p->pharma?->name,
+                    'doctor_name'     => $p->doctor?->name,
+                    'dispensed_at'    => $p->dispensed_at ? $p->dispensed_at->toDateString() : null,
+                    'date'            => $p->created_at->toDateString(),
+                ];
+            });
+
+        return response()->json([
+            'prescriptions' => $prescriptions,
+        ]);
+    }
 }

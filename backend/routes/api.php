@@ -58,6 +58,7 @@ Route::middleware('auth:api')->prefix('user')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy']);
     Route::post('/patient-profile', [ProfileController::class, 'updateProfile']);
     Route::get('/appointments', [ProfileController::class, 'appointments']);
+    Route::get('/prescriptions', [ProfileController::class, 'prescriptions']);
     Route::get('/files', [ProfileController::class, 'getFiles']);
     Route::post('/files', [ProfileController::class, 'storeMedicalFile']);
     Route::delete('/files/{id}', [ProfileController::class, 'destroyFile']);
