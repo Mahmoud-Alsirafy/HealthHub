@@ -292,6 +292,17 @@ class DoctorController extends Controller
                 'doctor_name'     => $r->doctor?->name,
                 'date'            => $r->created_at->toDateString(),
             ]),
+            'prescriptions' => $patient->prescriptions->map(fn($p) => [
+                'id'              => $p->id,
+                'medication_name' => $p->medication_name,
+                'dosage'          => $p->dosage,
+                'frequency'       => $p->frequency,
+                'duration'        => $p->duration,
+                'status'          => $p->status,
+                'doctor_name'     => $p->doctor?->name,
+                'pharma_name'     => $p->pharma?->name,
+                'date'            => $p->created_at->toDateString(),
+            ]),
         ];
     }
 }

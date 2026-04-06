@@ -63,9 +63,14 @@ class User extends Authenticatable implements JWTSubject
     }
 
     public function labReports()
-{
-    return $this->hasMany(LabReport::class);
-}
+    {
+        return $this->hasMany(LabReport::class);
+    }
+
+    public function prescriptions()
+    {
+        return $this->hasMany(Prescription::class);
+    }
 
     // -------------------------------------------------------
     // JWT

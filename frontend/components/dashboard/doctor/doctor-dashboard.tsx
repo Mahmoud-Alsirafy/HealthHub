@@ -656,25 +656,55 @@ export function DoctorDashboardContent() {
                           </Button>
                         </div>
 
-                        <div className="mt-2 space-y-2">
-                          <h4 className="text-sm font-semibold flex items-center gap-2">
-                            <FileText className="h-4 w-4" /> Medical History
-                          </h4>
+                        <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div className="space-y-2">
-                            {patient.reports && patient.reports.length > 0 ? (
-                              patient.reports.map((report: any) => (
-                                <div key={report.id} className="text-sm p-2 bg-secondary/30 rounded border border-border/50">
-                                  <div className="flex justify-between items-start mb-1">
-                                    <span className="font-medium">{report.diagnosis}</span>
-                                    <span className="text-xs text-muted-foreground">{report.date}</span>
+                            <h4 className="text-sm font-bold flex items-center gap-2 text-primary">
+                              <FileText className="h-4 w-4" /> Medical Reports
+                            </h4>
+                            <div className="space-y-2 max-h-[160px] overflow-y-auto pr-1">
+                              {patient.reports && patient.reports.length > 0 ? (
+                                patient.reports.map((report: any) => (
+                                  <div key={report.id} className="text-sm p-3 bg-secondary/30 rounded-xl border border-border/50">
+                                    <div className="flex justify-between items-start mb-1">
+                                      <span className="font-bold text-foreground">{report.diagnosis}</span>
+                                      <span className="text-[10px] text-muted-foreground bg-background px-1.5 py-0.5 rounded border">{report.date}</span>
+                                    </div>
+                                    <p className="text-[10px] text-primary font-medium tracking-tight uppercase">By {report.doctor_name}</p>
+                                    {report.notes && <p className="text-[11px] mt-1 text-muted-foreground line-clamp-2">{report.notes}</p>}
                                   </div>
-                                  <p className="text-xs text-muted-foreground italic">By {report.doctor_name}</p>
-                                  {report.notes && <p className="text-xs mt-1">{report.notes}</p>}
-                                </div>
-                              ))
-                            ) : (
-                              <p className="text-xs text-muted-foreground">No previous reports found.</p>
-                            )}
+                                ))
+                              ) : (
+                                <div className="text-xs text-muted-foreground italic p-4 text-center border-2 border-dashed rounded-xl">No previous reports found.</div>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="space-y-2">
+                            <h4 className="text-sm font-bold flex items-center gap-2 text-indigo-600">
+                              <Pill className="h-4 w-4" /> Prescriptions
+                            </h4>
+                            <div className="space-y-2 max-h-[160px] overflow-y-auto pr-1">
+                              {patient.prescriptions && patient.prescriptions.length > 0 ? (
+                                patient.prescriptions.map((p: any) => (
+                                  <div key={p.id} className="text-sm p-3 bg-indigo-500/5 rounded-xl border border-indigo-500/10">
+                                    <div className="flex justify-between items-start mb-1">
+                                      <span className="font-bold text-indigo-700">{p.medication_name}</span>
+                                      <Badge variant="outline" className={`text-[9px] uppercase font-bold ${p.status === 'dispensed' ? 'text-emerald-600 border-emerald-200 bg-emerald-50' : 'text-amber-600 border-amber-200 bg-amber-50'}`}>
+                                        {p.status}
+                                      </Badge>
+                                    </div>
+                                    <div className="flex flex-wrap gap-2 text-[10px] text-indigo-600/70 font-medium">
+                                      <span>{p.dosage}</span>
+                                      <span>•</span>
+                                      <span>{p.frequency}</span>
+                                    </div>
+                                    <p className="text-[10px] text-muted-foreground mt-1 font-medium">{p.date}</p>
+                                  </div>
+                                ))
+                              ) : (
+                                <div className="text-xs text-muted-foreground italic p-4 text-center border-2 border-dashed rounded-xl">No active prescriptions.</div>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -741,6 +771,40 @@ export function DoctorDashboardContent() {
                             <p className="text-[10px] font-bold text-destructive/70 uppercase">Allergies</p>
                             <p className="text-sm font-medium">{selectedPatient.profile?.allergies || "No allergies reported."}</p>
                           </div>
+                        </div>
+                      </div>
+
+                      <div className="space-y-3">
+                        <h4 className="text-sm font-bold flex items-center gap-2 uppercase tracking-tight text-indigo-600">
+                          <Pill className="h-4 w-4" /> Active Prescriptions
+                        </h4>
+                        <div className="space-y-2">
+                          {selectedPatient.prescriptions && selectedPatient.prescriptions.length > 0 ? (
+                            selectedPatient.prescriptions.map((p: any) => (
+                              <div key={p.id} className="p-3 bg-indigo-500/5 rounded-xl border border-indigo-500/10">
+                                <div className="flex justify-between items-center mb-1">
+                                  <span className="font-bold text-indigo-700">{p.medication_name}</span>
+                                  <Badge className={p.status === 'dispensed' ? 'bg-emerald-500' : 'bg-amber-500'}>
+                                    {p.status}
+                                  </Badge>
+                                </div>
+                                <div className="flex gap-3 text-xs text-indigo-600/70 font-medium">
+                                  <span>{p.dosage}</span>
+                                  <span>{p.frequency}</span>
+                                  <span>{p.duration}</span>
+                                </div>
+                                <div className="mt-2 flex justify-between items-end text-[10px]">
+                                  <span className="text-muted-foreground italic">Dr. {p.doctor_name}</span>
+                                  <span className="font-mono text-muted-foreground">{p.date}</span>
+                                </div>
+                              </div>
+                            ))
+                          ) : (
+                            <div className="text-sm text-muted-foreground italic bg-secondary/10 p-6 rounded-2xl border border-dashed border-border flex flex-col items-center gap-2 text-center">
+                              <Info className="h-5 w-5 opacity-20" />
+                              <p>No prescriptions recorded for this patient.</p>
+                            </div>
+                          )}
                         </div>
                       </div>
 
