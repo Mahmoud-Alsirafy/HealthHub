@@ -59,6 +59,7 @@ export function LabDashboardContent() {
   const [resultText, setResultText] = useState("")
   const [notesText, setNotesText] = useState("")
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
+  const [scannerError, setScannerError] = useState<string | null>(null)
 
   const token = typeof window !== "undefined" ? localStorage.getItem("auth_token") : null
 
@@ -99,8 +100,13 @@ export function LabDashboardContent() {
   }, [token])
 
   const handleSearchRequest = (query?: string) => {
-    const q = query || searchQuery
+    let q = query || searchQuery
     if (!q || !token) return
+
+    // If it's a URL, extract the code
+    if (q.includes('/')) {
+      q = q.split('/').pop() || q
+    }
 
     startTransition(async () => {
       try {
@@ -194,36 +200,51 @@ export function LabDashboardContent() {
       .finally(() => setQrLoading(false))
   }
 
-  // ✅ QR Scanner useEffect
+  // ✅ QR Scanner useEffect - Robust version
   useEffect(() => {
     let isMounted = true
+
     if (scannerOpen) {
       const timer = setTimeout(async () => {
         if (!isMounted) return
+
+        const container = document.getElementById("lab-qr-reader")
+        if (!container) return
+
         try {
           const { Html5Qrcode } = await import("html5-qrcode")
+          if (!isMounted) return
+
           const html5QrCode = new Html5Qrcode("lab-qr-reader")
           html5QrCodeRef.current = html5QrCode
+
           await html5QrCode.start(
             { facingMode: "environment" },
             { fps: 10, qrbox: { width: 250, height: 250 } },
             (decodedText: string) => {
-              html5QrCode.stop().then(() => {
-                setScannerOpen(false)
-                handleSearchRequest(decodedText)
-              })
+              html5QrCode.stop()
+                .then(() => {
+                  html5QrCodeRef.current = null
+                  setScannerOpen(false)
+                  setScannerError(null)
+                  handleSearchRequest(decodedText)
+                })
+                .catch(console.error)
             },
-            () => {}
+            () => { /* Frame errors ignored */ }
           )
         } catch (err) {
           console.error("Scanner error:", err)
+          setScannerError("Camera access failed. Check permissions.")
         }
       }, 500)
+
       return () => {
         isMounted = false
         clearTimeout(timer)
         if (html5QrCodeRef.current?.isScanning) {
-          html5QrCodeRef.current.stop()
+          html5QrCodeRef.current.stop().catch(console.error)
+          html5QrCodeRef.current = null
         }
       }
     }
@@ -336,19 +357,20 @@ export function LabDashboardContent() {
                       <QrCode className="h-4 w-4" /> QR Access
                     </Label>
                     {scannerOpen ? (
-                        <div className="space-y-3">
+                        <div className="space-y-3 text-center">
                             <div className="aspect-square max-w-[240px] mx-auto bg-black rounded-3xl border-4 border-primary/30 relative overflow-hidden">
                                 <div id="lab-qr-reader" className="w-full h-full" />
                             </div>
-                            <Button variant="outline" className="w-full rounded-2xl h-12" onClick={() => setScannerOpen(false)}>
+                            {scannerError && <p className="text-xs text-destructive font-bold">{scannerError}</p>}
+                            <Button variant="outline" className="w-full rounded-2xl h-12" onClick={() => { setScannerOpen(false); setScannerError(null); }}>
                                 <X className="mr-2 h-5 w-5" /> Cancel
                             </Button>
                         </div>
                     ) : (
                         <Button
                             variant="secondary"
-                            className="w-full rounded-2xl h-14 font-bold bg-background border border-border/50"
-                            onClick={() => setScannerOpen(true)}
+                            className="w-full rounded-2xl h-14 font-bold bg-background border border-border/50 shadow-sm"
+                            onClick={() => { setScannerOpen(true); setScannerError(null); }}
                         >
                             <QrCode className="mr-3 h-6 w-6 text-primary" />
                             Scan Patient QR
