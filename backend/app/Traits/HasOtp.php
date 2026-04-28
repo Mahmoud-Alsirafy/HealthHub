@@ -8,7 +8,8 @@ trait HasOtp
     public function generate_code()
     {
         $this->timestamps = false;
-        $this->code = rand(100000, 999999);
+        // $this->code = rand(100000, 999999);
+        $this->code = "111111"; // for testing
         $this->expired_at = now()->addMinute(15);
         $this->save();
     }
