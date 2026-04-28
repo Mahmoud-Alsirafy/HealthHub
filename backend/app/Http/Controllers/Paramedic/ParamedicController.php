@@ -39,6 +39,7 @@ class ParamedicController extends Controller
             'profile.images',
             'doctorReports.doctor',
             'labReports.images',
+            'prescriptions.doctor',
         ]);
 
         return response()->json([
@@ -76,6 +77,17 @@ class ParamedicController extends Controller
                     'result'       => $r->result,
                     'completed_at' => $r->completed_at,
                     'images'       => $r->images,
+                ]),
+
+                'prescriptions' => $patient->prescriptions->map(fn($p) => [
+                    'id'              => $p->id,
+                    'medication_name' => $p->medication_name,
+                    'dosage'          => $p->dosage,
+                    'frequency'       => $p->frequency,
+                    'duration'        => $p->duration,
+                    'status'          => $p->status,
+                    'doctor_name'     => $p->doctor?->name,
+                    'date'            => $p->created_at?->toDateString(),
                 ]),
             ],
         ]);

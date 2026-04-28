@@ -494,3 +494,54 @@ export async function regenerateLabQrApi(token: string) {
   });
   return response.json();
 }
+
+// -------------------------------------------------------
+// Paramedic Dashboard APIs
+// -------------------------------------------------------
+
+export async function getParamedicMeApi(token: string) {
+  const response = await fetch(`${API_BASE_URL}/paramedic/me`, {
+    method: "GET",
+    headers: {
+      "Accept": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+  });
+  return response.json();
+}
+
+export async function searchParamedicPatientApi(token: string, search: string) {
+  const response = await fetch(`${API_BASE_URL}/paramedic/patients/search`, {
+    method: "POST",
+    headers: {
+      "Accept": "application/json",
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+    body: JSON.stringify({ search }),
+  });
+  return response.json();
+}
+
+export async function getParamedicQrApi(token: string) {
+  const response = await fetch(`${API_BASE_URL}/paramedic/qr`, {
+    method: "GET",
+    headers: {
+      "Accept": "application/json",
+      "Authorization": `Bearer ${token}`,
+    },
+  });
+  return response.json();
+}
+
+export async function regenerateParamedicQrApi(token: string) {
+  const response = await fetch(`${API_BASE_URL}/paramedic/qr/regenerate`, {
+    method: "POST",
+    headers: {
+      "Accept": "application/json",
+      "Authorization": `Bearer ${token}`,
+    },
+  });
+  return response.json();
+}
+

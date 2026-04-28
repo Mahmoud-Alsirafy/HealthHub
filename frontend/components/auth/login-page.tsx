@@ -194,7 +194,7 @@ function LoginForm() {
           } else if (userType === "labs") {
             router.push("/dashboard/lab");
           } else if (userType === "paramedics") {
-            router.push("/dashboard/facility");
+            router.push("/dashboard/paramedic");
           } else {
             router.push("/dashboard/patient");
           }
@@ -285,7 +285,7 @@ function LoginForm() {
           } else if (res.type === "labs") {
             router.push("/dashboard/lab");
           } else if (res.type === "paramedics") {
-            router.push("/dashboard/facility");
+            router.push("/dashboard/paramedic");
           } else {
             router.push("/dashboard/patient");
           }
