@@ -127,6 +127,11 @@ function LoginForm() {
   // ✅ Register Handler
   const handleRegister = () => {
     setError(null);
+    if (!role) {
+      setError("Please select your role before registering.");
+      return;
+    }
+
     startTransition(async () => {
       try {
         const fullName = `${firstName} ${lastName}`.trim();
@@ -136,7 +141,7 @@ function LoginForm() {
           password,
           password_confirmation: password,
           national_id: nationalId,
-          type: "users", // ✅ Register دايمًا users
+          type: role,
         };
 
         const res = await registerApi(payload);
@@ -153,7 +158,7 @@ function LoginForm() {
 
         if (res.user) {
           setUserId(res.user.id);
-          setUserType("users");
+          setUserType(role);
           setView("otp");
         }
       } catch (err) {
@@ -298,7 +303,7 @@ function LoginForm() {
     });
   };
 
-  // ✅ Google Auth Handler - forceType للـ Register عشان دايمًا users
+  // ✅ Google Auth Handler - uses role for registration and login
   const handleGoogleLogin = (forceType?: string) => {
     const type = forceType || role;
     if (!type) {
@@ -645,8 +650,24 @@ function LoginForm() {
                     </div>
 
                     <div className="space-y-2">
+                      <Label htmlFor="reg-role">I want to register as</Label>
+                      <Select value={role} onValueChange={setRole}>
+                        <SelectTrigger id="reg-role">
+                          <SelectValue placeholder="Choose a role" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="users">Patient</SelectItem>
+                          <SelectItem value="doctors">Doctor</SelectItem>
+                          <SelectItem value="labs">Lab</SelectItem>
+                          <SelectItem value="paramedics">Paramedic</SelectItem>
+                          <SelectItem value="pharmas">Pharmacy</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
                       <Label htmlFor="reg-national-id">National ID</Label>
-                      <Input id="reg-national-id" type="number" placeholder="14-digit National ID" value={nationalId} onChange={(e) => setNationalId(e.target.value)} />
+                      <Input id="reg-national-id" type="number" placeholder="Required for Patient or Doctor" value={nationalId} onChange={(e) => setNationalId(e.target.value)} />
                     </div>
 
                     <div className="space-y-2">
@@ -677,7 +698,15 @@ function LoginForm() {
                     <Button
                       className="w-full"
                       size="lg"
-                      disabled={isPending || !email || !password || !firstName || !lastName || !nationalId}
+                      disabled={
+                        isPending ||
+                        !role ||
+                        !email ||
+                        !password ||
+                        !firstName ||
+                        !lastName ||
+                        ((role === 'users' || role === 'doctors') && !nationalId)
+                      }
                       onClick={handleRegister}
                     >
                       {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
@@ -693,8 +722,8 @@ function LoginForm() {
                       </div>
                     </div>
 
-                    {/* ✅ Register Google - دايمًا بيبعت type=users */}
-                    <Button variant="outline" type="button" className="w-full h-11 font-semibold" onClick={() => handleGoogleLogin("users")}>
+                    {/* ✅ Register Google - uses selected role from the register tab */}
+                    <Button variant="outline" type="button" className="w-full h-11 font-semibold" onClick={() => handleGoogleLogin(role)}>
                       <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
                         <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
                         <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />

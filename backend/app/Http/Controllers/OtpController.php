@@ -26,16 +26,6 @@ class OtpController extends Controller
         return response()->json(['message' => 'OTP Verify Page', 'type' => $type, 'id' => $id]);
     }
 
-
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
     protected function getModel($type)
     {
         $models = [
@@ -54,57 +44,57 @@ class OtpController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-{
-    $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
-        'type' => 'required|string',
-        'id'   => 'required|integer',
-        'otp'  => 'required|string',
-    ]);
-
-    if ($validator->fails()) {
-        return response()->json(['errors' => $validator->errors()], 422);
-    }
-
-    $modelClass = $this->getModel($request->type);
-    if (!$modelClass) {
-        return response()->json(['error' => trans('auth.failed')], 404);
-    }
-
-    $user = $modelClass::find($request->id);
-    if (!$user) {
-        return response()->json(['error' => trans('auth.failed')], 404);
-    }
-
-    if ($user->expired_at && now()->greaterThan($user->expired_at)) {
-        return response()->json(['error' => trans('auth.expierd')], 400);
-    }
-
-    if ($request->otp != $user->code) {
-        return response()->json(['error' => trans('auth.error_OTP')], 400);
-    }
-
-    // ✅ reset الكود
-    $user->reset_code();
-
-    $guard = $this->checkGuard($request);
-
-    // return $guard;
-    // ✅ لو API → رجّع JWT token
-    if ($request->expectsJson()) {
-        $token = auth()->guard($guard)->login($user);
-
-        return response()->json([
-            'message' => trans('auth.success_login'),
-            'token'   => $token,
-            'type'    => 'bearer',
-            'user'    => $user,
+    {
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+            'type' => 'required|string',
+            'id'   => 'required|integer',
+            'otp'  => 'required|string',
         ]);
-    }
 
-    // ✅ لو Web → session login + redirect
-    Auth::guard($guard)->login($user);
-    return $this->redirect($request);
-}
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $modelClass = $this->getModel($request->type);
+        if (!$modelClass) {
+            return response()->json(['error' => trans('auth.failed')], 404);
+        }
+
+        $user = $modelClass::find($request->id);
+        if (!$user) {
+            return response()->json(['error' => trans('auth.failed')], 404);
+        }
+
+        if ($user->expired_at && now()->greaterThan($user->expired_at)) {
+            return response()->json(['error' => trans('auth.expierd')], 400);
+        }
+
+        if ($request->otp != $user->code) {
+            return response()->json(['error' => trans('auth.error_OTP')], 400);
+        }
+
+        // ✅ reset الكود
+        $user->reset_code();
+
+        $guard = $this->checkGuard($request);
+
+        // return $guard;
+        // ✅ لو API → رجّع JWT token
+        if ($request->expectsJson()) {
+            $token = auth()->guard($guard)->login($user);
+
+            return response()->json([
+                'message' => trans('auth.success_login'),
+                'token'   => $token,
+                'type'    => 'bearer',
+                'user'    => $user,
+            ]);
+        }
+
+        // ✅ لو Web → session login + redirect
+        Auth::guard($guard)->login($user);
+        return $this->redirect($request);
+    }
 
     public function resend($type, $id)
     {
@@ -129,39 +119,5 @@ class OtpController extends Controller
         $user->notify(new Otp());
 
         return response()->json(['message' => trans('auth.resend'), 'expires_at' => $user->expired_at], 200);
-    }
-
-
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
     }
 }

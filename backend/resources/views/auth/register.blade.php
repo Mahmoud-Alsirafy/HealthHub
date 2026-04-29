@@ -9,7 +9,16 @@
             <x-input-error :messages="$errors->get('name')" class="mt-2" />
         </div>
 
-        <input type="text" name="type" hidden value="{{ $type }}">
+        <div class="mt-4">
+            <x-input-label for="type" :value="__('Register as')" />
+            <select id="type" name="type" class="block mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" required>
+                @foreach(['users' => 'Patient', 'doctors' => 'Doctor', 'labs' => 'Lab', 'pharmas' => 'Pharmacy', 'paramedics' => 'Paramedic'] as $value => $label)
+                    <option value="{{ $value }}" {{ old('type', $type) === $value ? 'selected' : '' }}>{{ $label }}</option>
+                @endforeach
+            </select>
+            <x-input-error :messages="$errors->get('type')" class="mt-2" />
+        </div>
+
         <!-- Email Address -->
         <div class="mt-4">
             <x-input-label for="email" :value="__('Email')" />
@@ -43,12 +52,13 @@
         {{--  --}}
 
         <div class="mt-4">
-            <x-input-label for="national_id" :value="__('national_id')" />
+            <x-input-label for="national_id" :value="__('National ID (required for Patient and Doctor)')" />
 
             <x-text-input id="national_id" class="block mt-1 w-full"
                             type="number"
                             name="national_id"
-                            required autocomplete="new-national_id" />
+                            :value="old('national_id')"
+                            autocomplete="new-national_id" />
 
             <x-input-error :messages="$errors->get('national_id')" class="mt-2" />
         </div>

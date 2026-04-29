@@ -310,8 +310,8 @@ export const verifyPatientAccessApi = async (token: string, data: { patient_id: 
   return res.json();
 };
 
-// ✅ أضف دي في api.ts
-export async function analyzeMedicalImageApi(token: string, data: { folder: string; model_id: number; filename: string }) {
+// ✅ Analyze medical image by image ID
+export async function analyzeMedicalImageApi(token: string, imageId: number) {
   const response = await fetch(`${API_BASE_URL}/user/medical-image/analyze`, {
     method: "POST",
     headers: {
@@ -319,7 +319,7 @@ export async function analyzeMedicalImageApi(token: string, data: { folder: stri
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify(data),
+    body: JSON.stringify({ image_id: imageId }),
   })
   return response.json()
 }
@@ -544,4 +544,4 @@ export async function regenerateParamedicQrApi(token: string) {
   });
   return response.json();
 }
-
+

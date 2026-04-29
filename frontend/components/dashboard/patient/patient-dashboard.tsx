@@ -217,18 +217,14 @@ export default function PatientDashboardContent() {
     setAnalyzing(file.id)
     setAnalysisResult(null)
     try {
-      const res = await analyzeMedicalImageApi(token, {
-        folder: "PatientProfile",
-        model_id: profile?.profile?.id,
-        filename: file.filename,
-      })
+      const res = await analyzeMedicalImageApi(token, file.id)
       if (res.success) {
         setAnalysisResult({ id: file.id, text: res.explanation })
       } else {
         toast({ title: "Analysis Failed", description: res.message, variant: "destructive" })
       }
-    } catch {
-      toast({ title: "Error", description: "Failed to analyze image.", variant: "destructive" })
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to analyze image: " + (error instanceof Error ? error.message : "Unknown error"), variant: "destructive" })
     } finally {
       setAnalyzing(null)
     }

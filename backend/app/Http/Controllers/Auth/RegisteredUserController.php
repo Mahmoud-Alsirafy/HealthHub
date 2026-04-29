@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Models\User;
+use App\Traits\AuthTrait;
 use Twilio\Rest\Client;
 use Illuminate\View\View;
 use App\Notifications\Otp;
@@ -16,12 +16,25 @@ use Illuminate\Auth\Events\Registered;
 
 class RegisteredUserController extends Controller
 {
+    use AuthTrait;
+
+    private array $registrationTypes = [
+        'users' => 'Patient',
+        'doctors' => 'Doctor',
+        'labs' => 'Lab',
+        'pharmas' => 'Pharmacy',
+        'paramedics' => 'Paramedic',
+    ];
+
     /**
      * Display the registration view.
      */
-    public function create(): View
+    public function create(Request $request): View
     {
-        return view('auth.register');
+        return view('auth.register', [
+            'type' => $request->query('type', 'users'),
+            'registrationTypes' => $this->registrationTypes,
+        ]);
     }
 
     /**
@@ -31,51 +44,59 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        $guard = $this->checkGuard($request);
+        $modelClass = $this->getModelFromGuard($guard);
+        $tableName = (new $modelClass)->getTable();
+
         $request->validate([
+            'type' => ['required', 'in:users,doctors,labs,pharmas,paramedics'],
             'name' => 'required|string|max:255',
-            'email' => 'required|string|lowercase|email|max:255|unique:' . User::class,
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . $tableName],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'national_id' => 'required'
+            'national_id' => ['required_if:type,users,doctors', 'nullable'],
         ]);
 
-        $user = User::create([
+        $data = [
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'national_id' => $request->national_id,
-        ]);
-        event(new Registered($user));
+        ];
 
+        if (in_array($request->type, ['users', 'doctors'], true)) {
+            $data['national_id'] = $request->national_id;
+        }
 
-        $user = User::where('email', $request->email)->first();
+        $user = $modelClass::create($data);
 
-        // ! Genrate OTP Code
+        if ($request->type === 'users') {
+            event(new Registered($user));
+        }
 
         $user->generate_code();
-
-        // ! Email OTP
-
         $user->notify(new Otp());
 
-        // ! SMS OTP
-        $message = "Your OTP Code IS " . $user->code;
+        if ($request->type === 'users') {
+            $message = "Your OTP Code IS " . $user->code;
+            $account_sid = env('TWILIO_SID');
+            $account_token = env('TWILIO_TOKEN');
+            $account_from = env('TWILIO_FROM');
 
-        $account_sid   = env('TWILIO_SID');
-        $account_token = env('TWILIO_TOKEN');
-        $account_from  = env('TWILIO_FROM');
+            $client = new Client($account_sid, $account_token);
+            $client->messages->create(
+                '+201068492403',
+                [
+                    'from' => $account_from,
+                    'body' => $message,
+                ]
+            );
+        }
 
-        $client = new Client($account_sid, $account_token);
+        if ($guard === 'api') {
+            Auth::login($user);
+        } else {
+            Auth::guard($guard)->login($user);
+        }
 
-        $client->messages->create(
-            '+201068492403', // رقم المستلم
-            [
-                'from' => $account_from,
-                'body' => $message,
-            ]
-        );
-
-        Auth::login($user);
-
-        return redirect(route('dashboard', absolute: false));
+        return $this->redirect($request);
     }
 }

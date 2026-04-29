@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Google;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use App\Notifications\Otp;
 use DB;
 use Exception;
@@ -54,11 +53,7 @@ public function googlepagecallback(Request $request)
         $finduser = $config['model']::where('email', $googleUser->email)->first();
 
         if (!$finduser) {
-            // ✅ users بس اللي بيعملوا register بنفسهم
-            if ($type !== 'users') {
-                return redirect($frontendUrl . '/login?error=account_not_found&type=' . $type);
-            }
-
+            // ✅ Allow registration for all types via Google
             $finduser = $config['model']::create([
                 'name'     => $googleUser->name,
                 'email'    => $googleUser->email,
