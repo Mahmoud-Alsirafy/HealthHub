@@ -338,6 +338,63 @@ export function AdminDashboardContent() {
           </Button>
         </div>
 
+        <div className="grid gap-4 md:grid-cols-3">
+          <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">Total {admin?.type?.charAt(0).toUpperCase() + admin?.type?.slice(1)}s</CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{items.length}</div>
+              <p className="text-xs text-muted-foreground">Managed by you</p>
+            </CardContent>
+          </Card>
+          <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">Active Accounts</CardTitle>
+              <Shield className="h-4 w-4 text-emerald-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {items.filter(i => !i.expired_at || new Date(i.expired_at) > new Date()).length}
+              </div>
+              <p className="text-xs text-muted-foreground">Verified & valid</p>
+            </CardContent>
+          </Card>
+          {admin?.type === "pharma" ? (
+            <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium">Total Searches</CardTitle>
+                <Search className="h-4 w-4 text-primary" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {items.reduce((acc, curr) => acc + (curr.searches_count || 0), 0)}
+                </div>
+                <p className="text-xs text-muted-foreground">Across all pharmacies</p>
+              </CardContent>
+            </Card>
+          ) : (
+            <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium">Recently Joined</CardTitle>
+                <Plus className="h-4 w-4 text-primary" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {items.filter(i => {
+                    const joinDate = new Date(i.created_at);
+                    const weekAgo = new Date();
+                    weekAgo.setDate(weekAgo.getDate() - 7);
+                    return joinDate > weekAgo;
+                  }).length}
+                </div>
+                <p className="text-xs text-muted-foreground">In the last 7 days</p>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+
         <Tabs defaultValue="management" className="w-full">
           <TabsList className="grid w-full max-w-[400px] grid-cols-2">
             <TabsTrigger value="management">Management</TabsTrigger>
@@ -370,6 +427,8 @@ export function AdminDashboardContent() {
                       <TableHead>User</TableHead>
                       <TableHead>Email</TableHead>
                       {admin?.type === "doctor" && <TableHead>Specialty</TableHead>}
+                      {admin?.type === "pharma" && <TableHead>Searches</TableHead>}
+                      <TableHead>Status</TableHead>
                       <TableHead>Joined</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
@@ -401,6 +460,21 @@ export function AdminDashboardContent() {
                             </Badge>
                           </TableCell>
                         )}
+                        {admin?.type === "pharma" && (
+                          <TableCell>
+                            <div className="flex items-center gap-1">
+                              <Search className="h-3.5 w-3.5 text-muted-foreground" />
+                              <span>{item.searches_count || 0}</span>
+                            </div>
+                          </TableCell>
+                        )}
+                        <TableCell>
+                          {item.expired_at && new Date(item.expired_at) < new Date() ? (
+                            <Badge variant="destructive" className="font-normal">Expired</Badge>
+                          ) : (
+                            <Badge variant="outline" className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 font-normal">Active</Badge>
+                          )}
+                        </TableCell>
                         <TableCell className="text-muted-foreground">
                           {item.created_at ? new Date(item.created_at).toLocaleDateString() : "N/A"}
                         </TableCell>
