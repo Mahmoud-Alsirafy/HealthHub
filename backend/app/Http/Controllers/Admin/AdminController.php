@@ -8,6 +8,7 @@ use App\Models\Lab;
 use App\Models\Paramedic;
 use App\Models\Pharma;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 
@@ -18,7 +19,7 @@ class AdminController extends Controller
     // ================================================
     public function getDoctors()
     {
-        return response()->json(Doctor::paginate(10));
+        return response()->json(Doctor::where('admin_id', Auth::id())->paginate(10));
     }
 
     public function showDoctor(int $id)
@@ -32,10 +33,13 @@ class AdminController extends Controller
             'name'             => 'required|string|max:255',
             'email'            => 'required|email|unique:doctors,email',
             'password'         => 'required|string|min:6',
+            'phone'            => 'nullable|string',
+            'national_id'      => 'nullable|string|unique:doctors,national_id',
+            'birth_date'       => 'nullable|date',
+            'gender'           => 'nullable|in:male,female',
             'specialty'        => 'nullable|string',
             'facility'         => 'nullable|string',
             'department'       => 'nullable|string',
-            'phone'            => 'nullable|string',
             'experience_years' => 'nullable|integer',
             'license_number'   => 'nullable|string',
         ]);
@@ -44,12 +48,16 @@ class AdminController extends Controller
             'name'             => $request->name,
             'email'            => $request->email,
             'password'         => Hash::make($request->password),
+            'phone'            => $request->phone,
+            'national_id'      => $request->national_id,
+            'birth_date'       => $request->birth_date,
+            'gender'           => $request->gender,
             'specialty'        => $request->specialty,
             'facility'         => $request->facility,
             'department'       => $request->department,
-            'phone'            => $request->phone,
             'experience_years' => $request->experience_years,
             'license_number'   => $request->license_number,
+            'admin_id'         => Auth::id(),
         ]);
 
         return response()->json(['success' => true, 'doctor' => $doctor], 201);
@@ -63,10 +71,13 @@ class AdminController extends Controller
             'name'             => 'sometimes|string|max:255',
             'email'            => ['sometimes', 'email', Rule::unique('doctors', 'email')->ignore($id)], // ✅ ignore نفسه
             'password'         => 'sometimes|string|min:6',
+            'phone'            => 'nullable|string',
+            'national_id'      => ['nullable', 'string', Rule::unique('doctors', 'national_id')->ignore($id)],
+            'birth_date'       => 'nullable|date',
+            'gender'           => 'nullable|in:male,female',
             'specialty'        => 'nullable|string',
             'facility'         => 'nullable|string',
             'department'       => 'nullable|string',
-            'phone'            => 'nullable|string',
             'experience_years' => 'nullable|integer',
             'license_number'   => 'nullable|string',
         ]);
@@ -74,10 +85,13 @@ class AdminController extends Controller
         $doctor->update([
             'name'             => $request->name             ?? $doctor->name,
             'email'            => $request->email            ?? $doctor->email,
+            'phone'            => $request->phone            ?? $doctor->phone,
+            'national_id'      => $request->national_id      ?? $doctor->national_id,
+            'birth_date'       => $request->birth_date       ?? $doctor->birth_date,
+            'gender'           => $request->gender           ?? $doctor->gender,
             'specialty'        => $request->specialty        ?? $doctor->specialty,
             'facility'         => $request->facility         ?? $doctor->facility,
             'department'       => $request->department       ?? $doctor->department,
-            'phone'            => $request->phone            ?? $doctor->phone,
             'experience_years' => $request->experience_years ?? $doctor->experience_years,
             'license_number'   => $request->license_number   ?? $doctor->license_number,
             ...($request->filled('password') ? ['password' => Hash::make($request->password)] : []),
@@ -98,7 +112,7 @@ class AdminController extends Controller
     // ================================================
     public function getLabs()
     {
-        return response()->json(Lab::paginate(10));
+        return response()->json(Lab::where('admin_id', Auth::id())->paginate(10));
     }
 
     public function showLab(int $id)
@@ -118,6 +132,7 @@ class AdminController extends Controller
             'name'     => $request->name,
             'email'    => $request->email,
             'password' => Hash::make($request->password),
+            'admin_id' => Auth::id(),
         ]);
 
         return response()->json(['success' => true, 'lab' => $lab], 201);
@@ -154,7 +169,7 @@ class AdminController extends Controller
     // ================================================
     public function getPharmas()
     {
-        return response()->json(Pharma::paginate(10));
+        return response()->json(Pharma::where('admin_id', Auth::id())->paginate(10));
     }
 
     public function showPharma(int $id)
@@ -174,6 +189,7 @@ class AdminController extends Controller
             'name'     => $request->name,
             'email'    => $request->email,
             'password' => Hash::make($request->password),
+            'admin_id' => Auth::id(),
         ]);
 
         return response()->json(['success' => true, 'pharma' => $pharma], 201);
@@ -210,7 +226,7 @@ class AdminController extends Controller
     // ================================================
     public function getParamedics()
     {
-        return response()->json(Paramedic::paginate(10));
+        return response()->json(Paramedic::where('admin_id', Auth::id())->paginate(10));
     }
 
     public function showParamedic(int $id)
@@ -230,6 +246,7 @@ class AdminController extends Controller
             'name'     => $request->name,
             'email'    => $request->email,
             'password' => Hash::make($request->password),
+            'admin_id' => Auth::id(),
         ]);
 
         return response()->json(['success' => true, 'paramedic' => $paramedic], 201);

@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('code')->nullable();
             $table->datetime('expired_at')->nullable();
             $table->string('qr_code', 64)->nullable()->unique();
+            $table->foreignId('admin_id')->references('id')->on('admins')->onDelete('cascade');
 
             // بيانات شخصية
             $table->string('phone')->nullable();

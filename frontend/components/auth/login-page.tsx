@@ -191,6 +191,7 @@ function LoginForm() {
         if (res.token) {
           localStorage.setItem("auth_token", res.token);
           localStorage.setItem("auth_type", userType);
+          if (res.user) localStorage.setItem("auth_user", JSON.stringify(res.user));
 
           if (userType === "doctors") {
             router.push("/dashboard/doctor");
@@ -200,6 +201,8 @@ function LoginForm() {
             router.push("/dashboard/lab");
           } else if (userType === "paramedics") {
             router.push("/dashboard/paramedic");
+          } else if (userType === "admins") {
+            router.push("/dashboard/admin");
           } else {
             router.push("/dashboard/patient");
           }
@@ -282,6 +285,7 @@ function LoginForm() {
         if (res.token) {
           localStorage.setItem("auth_token", res.token);
           localStorage.setItem("auth_type", res.type || "users");
+          if (res.user) localStorage.setItem("auth_user", JSON.stringify(res.user));
 
           if (res.type === "doctors" || res.type === "doctor") {
             router.push("/dashboard/doctor");
@@ -291,6 +295,8 @@ function LoginForm() {
             router.push("/dashboard/lab");
           } else if (res.type === "paramedics") {
             router.push("/dashboard/paramedic");
+          } else if (res.type === "admins" || res.type === "admin") {
+            router.push("/dashboard/admin");
           } else {
             router.push("/dashboard/patient");
           }
@@ -547,6 +553,7 @@ function LoginForm() {
                           <SelectItem value="labs">Lab</SelectItem>
                           <SelectItem value="paramedics">Paramedic</SelectItem>
                           <SelectItem value="pharmas">Pharmacy</SelectItem>
+                          <SelectItem value="admins">Admin</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>

@@ -13,7 +13,7 @@ class Paramedic extends Authenticatable implements JWTSubject
 {
     use HasFactory, Notifiable, HasOtp;
 
-    protected $fillable = ['name', 'email', 'password', 'qr_code'];
+    protected $fillable = ['name', 'email', 'password', 'qr_code', 'admin_id'];
     protected $visible = [
         'id',
         'name',

@@ -17,11 +17,11 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        $this->call(AdminTable::class);
         $this->call(UserTable::class);
         $this->call(DoctorTable::class);
-        $this->call(PharmaTable::class);
-        $this->call(ParamedicTable::class);
-        $this->call(LabTable::class);
-        $this->call(AdminTable::class);
+        // $this->call(PharmaTable::class);
+        // $this->call(ParamedicTable::class);
+        // $this->call(LabTable::class);
     }
 }

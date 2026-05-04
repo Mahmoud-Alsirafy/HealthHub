@@ -23,6 +23,7 @@ class DoctorTable extends Seeder
             'facility'  => 'Cairo University Hospital',
             'department' => 'Cardiology',
             'experience_years' => 10,
+            'admin_id'=>1,
         ]);
         Doctor::create([
             'name'     => 'Dr. zeyad El-Sayed',
@@ -32,6 +33,7 @@ class DoctorTable extends Seeder
             'facility'  => 'Cairo University Hospital',
             'department' => 'Cardiology',
             'experience_years' => 10,
+            'admin_id'=>2,
         ]);
         Doctor::create([
             'name'     => 'Dr. Sarah El-Sayed',
@@ -41,6 +43,7 @@ class DoctorTable extends Seeder
             'facility'  => 'Cairo University Hospital',
             'department' => 'Cardiology',
             'experience_years' => 10,
+            'admin_id'=>2,
         ]);
         Doctor::create([
             'name'     => 'Dr. Mahmoud Alsirafy',
@@ -50,6 +53,7 @@ class DoctorTable extends Seeder
             'facility'  => 'oi institute',
             'department' => 'Cardiology',
             'experience_years' => 10,
+            'admin_id'=>2,
         ]);
     }
 }

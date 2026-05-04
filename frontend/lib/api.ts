@@ -545,3 +545,236 @@ export async function regenerateParamedicQrApi(token: string) {
   return response.json();
 }
 
+
+// -------------------------------------------------------
+// Admin Dashboard APIs
+// -------------------------------------------------------
+
+export async function getAdminMeApi(token: string) {
+  const response = await fetch(`${API_BASE_URL}/admin/me`, {
+    method: "GET",
+    headers: {
+      "Accept": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+  });
+  // Note: If /admin/me doesn't exist, we'll fallback to /user/me or check LoginController@me logic
+  return response.json();
+}
+
+// Doctors CRUD
+export async function adminGetDoctorsApi(token: string) {
+  const response = await fetch(`${API_BASE_URL}/admin/doctors`, {
+    method: "GET",
+    headers: {
+      "Accept": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+  });
+  return response.json();
+}
+
+export async function adminStoreDoctorApi(token: string, data: any) {
+  const response = await fetch(`${API_BASE_URL}/admin/doctors`, {
+    method: "POST",
+    headers: {
+      "Accept": "application/json",
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+    body: JSON.stringify(data),
+  });
+  return response.json();
+}
+
+export async function adminUpdateDoctorApi(token: string, id: number, data: any) {
+  const response = await fetch(`${API_BASE_URL}/admin/doctors/${id}`, {
+    method: "POST", // Backend uses POST for update in routes
+    headers: {
+      "Accept": "application/json",
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+    body: JSON.stringify(data),
+  });
+  return response.json();
+}
+
+export async function adminDeleteDoctorApi(token: string, id: number) {
+  const response = await fetch(`${API_BASE_URL}/admin/doctors/${id}`, {
+    method: "DELETE",
+    headers: {
+      "Accept": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+  });
+  return response.json();
+}
+
+// Labs CRUD
+export async function adminGetLabsApi(token: string) {
+  const response = await fetch(`${API_BASE_URL}/admin/labs`, {
+    method: "GET",
+    headers: {
+      "Accept": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+  });
+  return response.json();
+}
+
+export async function adminStoreLabApi(token: string, data: any) {
+  const response = await fetch(`${API_BASE_URL}/admin/labs`, {
+    method: "POST",
+    headers: {
+      "Accept": "application/json",
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+    body: JSON.stringify(data),
+  });
+  return response.json();
+}
+
+export async function adminUpdateLabApi(token: string, id: number, data: any) {
+  const response = await fetch(`${API_BASE_URL}/admin/labs/${id}`, {
+    method: "POST",
+    headers: {
+      "Accept": "application/json",
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+    body: JSON.stringify(data),
+  });
+  return response.json();
+}
+
+export async function adminDeleteLabApi(token: string, id: number) {
+  const response = await fetch(`${API_BASE_URL}/admin/labs/${id}`, {
+    method: "DELETE",
+    headers: {
+      "Accept": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+  });
+  return response.json();
+}
+
+// Pharmas CRUD
+export async function adminGetPharmasApi(token: string) {
+  const response = await fetch(`${API_BASE_URL}/admin/pharmas`, {
+    method: "GET",
+    headers: {
+      "Accept": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+  });
+  return response.json();
+}
+
+export async function adminStorePharmaApi(token: string, data: any) {
+  const response = await fetch(`${API_BASE_URL}/admin/pharmas`, {
+    method: "POST",
+    headers: {
+      "Accept": "application/json",
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+    body: JSON.stringify(data),
+  });
+  return response.json();
+}
+
+export async function adminUpdatePharmaApi(token: string, id: number, data: any) {
+  const response = await fetch(`${API_BASE_URL}/admin/pharmas/${id}`, {
+    method: "POST",
+    headers: {
+      "Accept": "application/json",
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+    body: JSON.stringify(data),
+  });
+  return response.json();
+}
+
+export async function adminDeletePharmaApi(token: string, id: number) {
+  const response = await fetch(`${API_BASE_URL}/admin/pharmas/${id}`, {
+    method: "DELETE",
+    headers: {
+      "Accept": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+  });
+  return response.json();
+}
+
+// Paramedics CRUD
+export async function adminGetParamedicsApi(token: string) {
+  const response = await fetch(`${API_BASE_URL}/admin/paramedics`, {
+    method: "GET",
+    headers: {
+      "Accept": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+  });
+  return response.json();
+}
+
+export async function adminStoreParamedicApi(token: string, data: any) {
+  const response = await fetch(`${API_BASE_URL}/admin/paramedics`, {
+    method: "POST",
+    headers: {
+      "Accept": "application/json",
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+    body: JSON.stringify(data),
+  });
+  return response.json();
+}
+
+export async function adminUpdateParamedicApi(token: string, id: number, data: any) {
+  const response = await fetch(`${API_BASE_URL}/admin/paramedics/${id}`, {
+    method: "POST",
+    headers: {
+      "Accept": "application/json",
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+    body: JSON.stringify(data),
+  });
+  return response.json();
+}
+
+export async function adminDeleteParamedicApi(token: string, id: number) {
+  const response = await fetch(`${API_BASE_URL}/admin/paramedics/${id}`, {
+    method: "DELETE",
+    headers: {
+      "Accept": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+  });
+  return response.json();
+}
+
+export async function adminGetQrApi(token: string) {
+  const response = await fetch(`${API_BASE_URL}/admin/qr`, {
+    headers: {
+      "Accept": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+  });
+  return response.json();
+}
+
+export async function adminRegenerateQrApi(token: string) {
+  const response = await fetch(`${API_BASE_URL}/admin/qr/regenerate`, {
+    method: "POST",
+    headers: {
+      "Accept": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+  });
+  return response.json();
+}

@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('email')->unique();
             $table->string('password');
+            $table->foreignId('admin_id')->references('id')->on('admins')->onDelete('cascade');
             $table->string('code')->nullable();
             $table->string('qr_code', 64)->nullable()->unique();
             $table->datetime('expired_at')->nullable();
